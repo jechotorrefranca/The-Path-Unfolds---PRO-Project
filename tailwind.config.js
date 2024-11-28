@@ -4,7 +4,12 @@ module.exports = {
     "./public/index.html",
   ],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        breatheFire: ['Breathe Fire', 'sans-serif'], 
+        morris: ['MorrisRomanBlack', 'sans-serif']
+      },
+    },
   },
   plugins: [],
 };

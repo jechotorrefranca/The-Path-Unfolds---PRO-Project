@@ -5,7 +5,7 @@ const TitleScreen = () => {
   const importAll = (requireContext) =>
     requireContext.keys().map(requireContext);
   const backgrounds = importAll(
-    require.context("../Game BG", false, /\.(png|jpe?g|svg)$/)
+    require.context("../assets/Game BG", false, /\.(png|jpe?g|svg)$/)
   );
 
   // Randomly select an image
@@ -21,7 +21,7 @@ const TitleScreen = () => {
         backgroundPosition: "center",
       }}
     >
-      <h1 className="text-5xl font-extrabold text-white mb-12 drop-shadow-md">
+      <h1 className="font-breatheFire text-5xl font-extrabold text-white mb-12 drop-shadow-md">
         The Path Unfolds
       </h1>
       <div className="flex flex-col space-y-6">
