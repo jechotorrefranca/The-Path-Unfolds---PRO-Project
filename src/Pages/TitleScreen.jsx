@@ -26,12 +26,12 @@ const TitleScreen = () => {
 
   {/* Title Text */}
   <h1
-    className="font-breatheFire text-[10rem] font-bold text-white ml-[5rem] mt-[3rem] leading-[1] tracking-widest z-10"
+    className="font-breatheFire text-[10rem] text-white ml-[5rem] mt-[3rem] leading-[1] tracking-widest z-10"
     style={{
       textShadow: "0.7rem 0.5rem 0.3rem rgba(0, 0, 0, 0.8)", // Adjust shadow intensity here
     }}
   >
-    The <br />Path Unfolds
+    THE <br />PATH UNFOLDS
   </h1>
 
   {/* Container for buttons */}
