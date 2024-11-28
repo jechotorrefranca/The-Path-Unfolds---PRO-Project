@@ -2,37 +2,41 @@ import React from "react";
 import { Link } from "react-router-dom";
 
 const TitleScreen = () => {
-  const backgrounds = [
-    "https://via.placeholder.com/1920x1080?text=Background+1",
-    "https://via.placeholder.com/1920x1080?text=Background+2",
-    "https://via.placeholder.com/1920x1080?text=Background+3",
-  ];
+  const importAll = (requireContext) =>
+    requireContext.keys().map(requireContext);
+  const backgrounds = importAll(
+    require.context("../Game BG", false, /\.(png|jpe?g|svg)$/)
+  );
+
+  // Randomly select an image
   const randomBackground =
     backgrounds[Math.floor(Math.random() * backgrounds.length)];
 
   return (
     <div
-      className="h-screen w-screen flex flex-col items-center justify-center text-white"
+      className="h-screen w-screen flex flex-col justify-center items-center text-center"
       style={{
         backgroundImage: `url(${randomBackground})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
       }}
     >
-      <h1 className="text-4xl font-bold mb-8">The Path Unfolds</h1>
-      <div className="flex flex-col space-y-4">
+      <h1 className="text-5xl font-extrabold text-white mb-12 drop-shadow-md">
+        The Path Unfolds
+      </h1>
+      <div className="flex flex-col space-y-6">
         <Link to="/game">
-          <button className="px-6 py-3 bg-gray-800 bg-opacity-70 hover:bg-gray-600 rounded-md text-lg">
+          <button className="px-8 py-4 bg-gray-800 bg-opacity-70 text-white hover:bg-gray-600 hover:bg-opacity-90 rounded-md text-xl transition duration-300 shadow-md transform hover:scale-105">
             Start Game
           </button>
         </Link>
         <Link to="/settings">
-          <button className="px-6 py-3 bg-gray-800 bg-opacity-70 hover:bg-gray-600 rounded-md text-lg">
+          <button className="px-8 py-4 bg-gray-800 bg-opacity-70 text-white hover:bg-gray-600 hover:bg-opacity-90 rounded-md text-xl transition duration-300 shadow-md transform hover:scale-105">
             Settings
           </button>
         </Link>
         <Link to="/about">
-          <button className="px-6 py-3 bg-gray-800 bg-opacity-70 hover:bg-gray-600 rounded-md text-lg">
+          <button className="px-8 py-4 bg-gray-800 bg-opacity-70 text-white hover:bg-gray-600 hover:bg-opacity-90 rounded-md text-xl transition duration-300 shadow-md transform hover:scale-105">
             About
           </button>
         </Link>
