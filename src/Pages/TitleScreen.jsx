@@ -11,7 +11,7 @@ const TitleScreen = () => {
     require.context("../assets/Game BG", false, /\.(png|jpe?g|svg)$/)
   );
 
-  const randomBackground = backgrounds[Math.floor(Math.random() * backgrounds.length)];
+  const [bgImage, setBgImage] = useState(""); // State to manage background image
   const [audio] = useState(new Audio(backgroundMusic));
   const [isModalOpen, setIsModalOpen] = useState(true); // Modal state
   const [isStarted, setIsStarted] = useState(false); // To trigger animation when game starts
@@ -22,6 +22,7 @@ const TitleScreen = () => {
     audio.play();
     setIsModalOpen(false); // Close modal after starting music
     setIsStarted(true); // Start the game animation
+    setBgImage(backgrounds[Math.floor(Math.random() * backgrounds.length)]); // Set random background after starting
   };
 
   // Animation variants
@@ -47,7 +48,8 @@ const TitleScreen = () => {
     <div
       className="h-screen w-screen flex flex-col relative"
       style={{
-        backgroundImage: `url(${randomBackground})`,
+        backgroundImage: bgImage ? `url(${bgImage})` : "none", // Only set background if image is available
+        backgroundColor: !bgImage ? "black" : "transparent", // Set black background initially
         backgroundSize: "cover",
         backgroundPosition: "center",
       }}
@@ -97,7 +99,7 @@ const TitleScreen = () => {
             <span className="absolute inset-0 bg-gradient-to-r from-transparent to-blue-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
           </button>
         </Link>
-        
+
         <Link to="/about">
           <button className="relative py-10 text-white rounded-full pr-[2rem] pl-[15rem] text-xl group overflow-hidden flex">
             <span className="relative z-10 text-[5rem]">About</span>

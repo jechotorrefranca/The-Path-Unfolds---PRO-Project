@@ -57,11 +57,11 @@ const Modal = ({ isOpen, onClose, onConfirm }) => {
               Click "Start" to begin your journey!
             </p>
 
-            <div
-              className="flex justify-center space-x-4 font-morris text-[2rem]"
-              onClick={onConfirm}
-            >
-              <button className="px-[2rem] relative text-white rounded-full group overflow-hidden flex">
+            <div className="flex justify-center space-x-4 font-morris text-[2rem]">
+              <button
+                className="px-[2rem] relative text-white rounded-full group overflow-hidden flex"
+                onClick={onConfirm}
+              >
                 <span className="relative z-10">Start</span>
                 <span className="absolute inset-0 bg-blue-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
               </button>
