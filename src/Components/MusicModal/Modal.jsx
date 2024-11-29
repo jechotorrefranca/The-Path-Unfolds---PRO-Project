@@ -32,23 +32,24 @@ const Modal = ({ isOpen, onClose, onConfirm }) => {
         >
           {/* Backdrop animation with looping gradient */}
           <motion.div
-            className="absolute inset-0 bg-gradient-to-br from-black via-blue-600 to-black opacity-70 animate-gradient-background"
-            animate={{ opacity: isOpen ? 0.7 : 0 }}
+            className="absolute inset-0 bg-gradient-to-br from-black via-gray-900 to-black opacity-70 animate-gradient-background"
+            animate={{ opacity: isOpen ? 0.9 : 0 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
           />
 
           {/* Modal Content */}
           <motion.div
-            className="relative bg-gradient-to-br from-gray-700 via-gray-800 to-gray-900 border border-gray-500 rounded-lg shadow-xl p-6 w-11/12 max-w-md transform transition duration-300 hover:scale-105"
+            className="relative border border-white rounded-lg shadow-xl p-6 w-11/12 max-w-md transform transition duration-300 hover:scale-105"
             variants={modalVariants}
             initial="initial"
             animate={isOpen ? "animate" : ""}
             exit="exit"
+            style={{ backgroundColor: 'rgba(0, 0, 0, 0.45)' }} // Semi-transparent modal background
           >
             <h2 className="text-3xl font-bold text-white mb-4 text-center">
               Welcome to 
-              <p className="text-blue-400">The Path Unfolds</p>
+              <p className="text-blue-400 font-breatheFire tracking-widest">The Path Unfolds</p>
             </h2>
             <p className="mb-6 text-white text-center">
               Click "Start Game" to begin your journey and enable background music!
@@ -57,7 +58,7 @@ const Modal = ({ isOpen, onClose, onConfirm }) => {
             <div className="flex justify-center space-x-4">
               <button
                 onClick={onConfirm}
-                className="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-lg hover:scale-110 transform transition duration-300 hover:bg-blue-600"
+                className="font-morris text-[2rem] text-white px-4 py-2 rounded-lg shadow-lg hover:scale-110 transform transition duration-300 hover:bg-blue-600"
               >
                 Start Game
               </button>
