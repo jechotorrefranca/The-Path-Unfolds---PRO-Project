@@ -1,0 +1,135 @@
+/* Visual Novel Style Modal */
+.modal-overlay {
+  font-family: "MorrisRomanBlack", serif;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: rgba(0, 0, 0, 0.9);
+  padding: 2rem;
+  border-radius: 10px;
+  max-width: 500px;
+  width: 100%;
+  color: white;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  border: 3px solid #8a6fff; /* Light purple border to match a visual novel theme */
+}
+
+.modal-header {
+  text-align: center;
+  font-size: 2.5rem;
+  font-family: "BreeSerif", serif; /* Elegant font for titles */
+  margin-bottom: 1rem;
+  color: #d8b2ff;
+}
+
+.section-title {
+  font-size: 1.5rem;
+  font-family: "BreeSerif", serif;
+  margin-bottom: 0.5rem;
+}
+
+.setting-section {
+  margin-bottom: 1.5rem;
+}
+
+/* Styling for sliders */
+.modal-input[type="range"] {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  height: 8px;
+  -webkit-appearance: none;
+}
+
+.modal-input[type="range"]::-webkit-slider-runnable-track {
+  background: #d8b2ff;
+  height: 8px;
+  border-radius: 10px;
+}
+
+.modal-input[type="range"]:focus {
+  outline: none;
+}
+
+/* Styling for checkboxes */
+.modal-checkbox {
+  margin-left: 1rem;
+  accent-color: #8a6fff; /* Purple accent for the checkbox */
+}
+
+/* Buttons */
+.reset-button,
+.save-button {
+  background-color: #8a6fff;
+  color: white;
+  padding: 0.75rem 2rem;
+  font-size: 1.25rem;
+  border: none;
+  cursor: pointer;
+  border-radius: 20px;
+  transition: all 0.3s ease-in-out;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.reset-button:hover,
+.save-button:hover {
+  background-color: #6b4cfc;
+  transform: translateY(-3px);
+}
+
+.button-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.setting-label {
+  display: block;
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+}
+
+.modal-checkbox {
+  margin-left: 0.5rem;
+}
+
+.modal-input {
+  font-size: 1rem;
+  padding: 0.5rem;
+  background-color: transparent;
+  border: 1px solid #8a6fff;
+  border-radius: 10px;
+  color: white;
+  margin-top: 0.5rem;
+  cursor: grabbing;
+}
+
+.modal-input:focus {
+  border-color: #ff70e7;
+  outline: none;
+}
+
+.modal-input[type="range"]::-webkit-slider-thumb {
+  background: #8a6fff;
+  border-radius: 50%;
+  border: 2px solid #d8b2ff;
+  width: 25px;
+  height: 25px;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+  margin-top: -0.25rem;
+}
+
+.modal-input[type="range"]:active::-webkit-slider-thumb {
+  background-color: #6b4cfc; /* Darker when clicked */
+  transform: scale(1.1); /* Slightly enlarge when clicked */
+}
