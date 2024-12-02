@@ -2,7 +2,7 @@ import React from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import TitleScreen from "./Pages/TitleScreen";
 // import About from "./Pages/About"
-// import Game from "./Game/Game"
+import GamePage from "./Game/GamePage"
 
 const router = createBrowserRouter([
   {
@@ -13,10 +13,10 @@ const router = createBrowserRouter([
   //   path: "/about",
   //   element: <About />,
   // },
-  // {
-  //   path: "/game",
-  //   element: <Game />,
-  // },
+  {
+    path: "/game",
+    element: <GamePage />,
+  },
 ]);
 
 const App = () => {

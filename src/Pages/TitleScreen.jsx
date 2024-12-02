@@ -1,13 +1,15 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import Modal from "../Components/MusicModal/Modal";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import backgroundMusic from "../assets/TitleScreen Music/TitleScreenBGM.mp3";
 import SettingsModal from "../Components/SettingsModal/Settings";
-import Particles from "react-tsparticles"; // Import particles
+import Particles from "react-tsparticles";
 import "./TitleScreen.css";
 
 const TitleScreen = () => {
+  const navigate = useNavigate();
   const importAll = (requireContext) =>
     requireContext.keys().map(requireContext);
   const backgrounds = importAll(
@@ -22,6 +24,8 @@ const TitleScreen = () => {
   const [musicVolume, setMusicVolume] = useState(0.5);
   const [narratorVolume, setNarratorVolume] = useState(0.5);
   const [isMuted, setIsMuted] = useState(false);
+
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   const audioRef = useRef(null);
 
@@ -94,8 +98,34 @@ const TitleScreen = () => {
     },
   };
 
+  const handleStartGame = () => {
+    const audio = audioRef.current;
+
+    // Fade out the background music
+    if (audio) {
+      const fadeDuration = 1000; // Duration for fade-out in milliseconds
+      const fadeStep = 0.05; // Decrease volume by 0.05 per step
+      const interval = fadeDuration / (audio.volume / fadeStep); // Calculate interval for each step
+
+      const fadeOut = setInterval(() => {
+        if (audio.volume > 0) {
+          audio.volume = Math.max(0, audio.volume - fadeStep);
+        } else {
+          clearInterval(fadeOut);
+          audio.pause();
+        }
+      }, interval);
+    }
+
+    // Start transition
+    setIsTransitioning(true);
+    setTimeout(() => {
+      navigate("/game");
+    }, 1000); // Match the transition timing
+  };
+
   return (
-    <div
+    <motion.div
       className="h-screen w-screen flex flex-col relative"
       style={{
         backgroundImage: bgImage ? `url(${bgImage})` : "none",
@@ -103,60 +133,24 @@ const TitleScreen = () => {
         backgroundSize: "cover",
         backgroundPosition: "center",
       }}
+      initial={{ opacity: 1 }}
+      animate={{ opacity: isTransitioning ? 0 : 1 }}
+      transition={{ duration: 0.5 }}
     >
       {/* Particle Effect */}
       <Particles
         id="tsparticles"
         options={{
           particles: {
-            number: {
-              value: 100,
-              density: {
-                enable: true,
-                value_area: 800,
-              },
-            },
-            shape: {
-              type: "circle",
-            },
-            opacity: {
-              value: 0.8, // Increase opacity for better visibility
-              random: true,
-              anim: {
-                enable: true,
-                speed: 1,
-                opacity_min: 0.1, // Slightly higher min opacity
-              },
-            },
-            size: {
-              value: 4, // Increase size for better visibility
-              random: true,
-            },
-
-            move: {
-              enable: true,
-              speed: 1,
-              direction: "none",
-              random: true,
-              straight: false,
-            },
+            number: { value: 100, density: { enable: true, value_area: 800 } },
+            shape: { type: "circle" },
+            opacity: { value: 0.8, random: true },
+            size: { value: 4, random: true },
+            move: { enable: true, speed: 1, random: true },
           },
           interactivity: {
-            events: {
-              onhover: {
-                enable: true,
-                mode: "repulse",
-              },
-            },
+            events: { onhover: { enable: true, mode: "repulse" } },
           },
-        }}
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "100%",
-          zIndex: 100, // Set the z-index to 0 (or lower) so that particles stay behind the content
         }}
       />
 
@@ -185,12 +179,15 @@ const TitleScreen = () => {
         initial="initial"
         animate={isStarted ? "animate" : "initial"}
       >
-        <Link to="/game">
-          <button className="relative py-10 text-white rounded-full pr-[2rem] pl-[15rem] text-xl group overflow-hidden flex">
+        <motion.div className="" initial="initial" animate="animate">
+          <button
+            className="relative py-10 text-white rounded-full pr-[2rem] pl-[15rem] text-xl group overflow-hidden flex"
+            onClick={handleStartGame}
+          >
             <span className="relative text-[5rem] z-10">Start Game</span>
             <span className="absolute inset-0 bg-gradient-to-r from-transparent to-[#8a6fff] opacity-0 group-hover:opacity-100 transition-opacity duration-500"></span>
           </button>
-        </Link>
+        </motion.div>
 
         <button
           className="relative py-10 text-white rounded-full pr-[2rem] pl-[15rem] text-xl group overflow-hidden flex"
@@ -224,7 +221,7 @@ const TitleScreen = () => {
       />
 
       <audio ref={audioRef} src={backgroundMusic} />
-    </div>
+    </motion.div>
   );
 };
 
