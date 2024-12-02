@@ -43,7 +43,7 @@ const GamePage = () => {
         {
           role: "system",
           content:
-            "You are an AI storyteller creating an interactive adventure game. Provide a dynamic story based on player choices. Each story should be concise and capped at five prompts. Each prompt should be less than 50 words.",
+            "You are an AI storyteller creating an interactive adventure game. Provide a dynamic story based on player choices. Each story should be concise and capped at five prompts. Each prompt should be compressed into 50 words.",
         },
         {
           role: "user",
@@ -88,10 +88,12 @@ const GamePage = () => {
       ]);
 
       const content = response.trim();
+      console.log(content);
 
       if (content.includes("ACTION_NOT_POSSIBLE")) {
         // Trigger modal for invalid action and extract the explanation
         setModalMessage("Action not possible. Try a different approach.");
+
         setShowModal(true);
       } else {
         // Update the story context and proceed normally
