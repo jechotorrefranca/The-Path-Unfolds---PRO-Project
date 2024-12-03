@@ -30,26 +30,6 @@ const GamePage = () => {
     }
   }, [aiResponse]);
 
-  const typeStory = (story) => {
-    if (!story || story === "undefined") {
-      setTypedText("Error: Unable to fetch story.");
-      setIsTyping(false);
-      return;
-    }
-
-    let index = 0;
-    setIsTyping(true);
-    setTypedText(""); // Clear the previous text
-    const interval = setInterval(() => {
-      setTypedText((prev) => prev + story[index]);
-      index++;
-      if (index === story.length) {
-        clearInterval(interval);
-        setIsTyping(false);
-      }
-    }, 25);
-  };
-
   useEffect(() => {
     if (genre) {
       handleGenreSelection(genre);
@@ -181,7 +161,7 @@ const GamePage = () => {
         {
           role: "system",
           content:
-            "You are an AI storyteller validating actions in an interactive adventure game, use simple words to understand easier. Progress the story only if the action aligns with the narrative’s logic and is appropriate. Provide hints or subtly indicate actions, such as discovering items or paths within the story. Decide if the player's action results in a positive or negative outcome. If the action is illogical or inappropriate, respond with 'ACTION_NOT_POSSIBLE' and a brief explanation.",
+            "You are an AI storyteller validating actions in an interactive adventure game, use simple wwords to understand easier. Progress the story only if the action aligns with the narrative’s logic and is appropriate. Provide hints or subtly indicate actions, such as discovering items or paths within the story. Decide if the player's action results in a positive or negative outcome. If the action is illogical or inappropriate, respond with 'ACTION_NOT_POSSIBLE' and a brief explanation.",
         },
         {
           role: "user",
@@ -204,7 +184,10 @@ const GamePage = () => {
           content,
         ]);
         setAIResponse(content);
+        console.log(currentPrompt + 1);
         setCurrentPrompt((prev) => prev + 1);
+        console.log(currentPrompt);
+
         summarizeStoryForImage(content);
       }
 
@@ -227,7 +210,7 @@ const GamePage = () => {
         {
           role: "system",
           content:
-            "You are an AI storyteller tasked with creating an ending based on the player's actions and the context of the story. Determine whether the player receives a good or bad ending, considering their choices. Ensure the conclusion is well-defined and appropriate to the narrative, and adjust the length of the ending accordingly.",
+            "You are an AI storyteller tasked with creating an ending based on the player's actions and the context of the story. Determine whether the player receives a good or bad ending, considering their choices. Ensure the conclusion is well-defined and appropriate to the narrative, make sure it is under 100 words.",
         },
         {
           role: "user",
@@ -240,6 +223,7 @@ const GamePage = () => {
       setAIResponse(ending);
       setIsStoryComplete(true);
       summarizeStoryForImage(ending);
+      console.log(ending);
       console.log("Story end", storyContext);
     } catch (err) {
       console.error("Error generating the ending:", err);
@@ -253,6 +237,26 @@ const GamePage = () => {
       model: "llama-3.1-70b-versatile", // Specify the model name explicitly
     });
     return response.choices[0]?.message?.content || "";
+  };
+
+  const typeStory = (story) => {
+    if (!story || story === "undefined") {
+      setTypedText("Error: Unable to fetch story.");
+      setIsTyping(false);
+      return;
+    }
+
+    let index = -1;
+    setIsTyping(true);
+    setTypedText("");
+    const interval = setInterval(() => {
+      setTypedText((prev) => prev + story[index]);
+      index++;
+      if (index === story.length) {
+        clearInterval(interval);
+        setIsTyping(false);
+      }
+    }, 25);
   };
 
   const closeModal = () => {
