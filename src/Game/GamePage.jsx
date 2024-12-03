@@ -195,6 +195,7 @@ const GamePage = () => {
         handleEnding();
         console.log("finish");
       }
+      // move above
     } catch (err) {
       console.error("Error processing the action:", err);
       setError("Failed to process the action. Please try again.");
