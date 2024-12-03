@@ -108,7 +108,7 @@ const GamePage = () => {
   const generateImageFromSummary = async (summary) => {
     try {
       // Call your image generation API here
-      console.log("Generated prompt for image:", summary);
+      console.log("Generated prompt for image:", summary + "in an anime style");
 
       // Example: Replace with your image generation API
       // const imageUrl = await fetchImageFromAPI(summary);
@@ -183,6 +183,7 @@ const GamePage = () => {
           `Player action: ${playerAction}`,
           content,
         ]);
+
         setAIResponse(content);
         console.log(currentPrompt + 1);
         setCurrentPrompt((prev) => prev + 1);
@@ -195,7 +196,7 @@ const GamePage = () => {
         handleEnding();
         console.log("finish");
       }
-      // move above
+      // move above, if 5only player action
     } catch (err) {
       console.error("Error processing the action:", err);
       setError("Failed to process the action. Please try again.");
@@ -247,14 +248,16 @@ const GamePage = () => {
       return;
     }
 
-    let index = -1;
+    let index = -1; // Start from the first character
     setIsTyping(true);
-    setTypedText("");
+    setTypedText(""); // Initialize the typed text
+
     const interval = setInterval(() => {
-      setTypedText((prev) => prev + story[index]);
-      index++;
-      if (index === story.length) {
-        clearInterval(interval);
+      if (index < story.length) {
+        setTypedText((prev) => prev + story.charAt(index)); // Use `charAt` to ensure valid character
+        index++;
+      } else {
+        clearInterval(interval); // Clear interval when done
         setIsTyping(false);
       }
     }, 25);
