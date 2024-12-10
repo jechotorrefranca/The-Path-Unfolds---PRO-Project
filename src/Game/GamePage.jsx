@@ -178,25 +178,30 @@ const GamePage = () => {
         setModalMessage("Action not possible. Try a different approach.");
         setShowModal(true);
       } else {
-        setStoryContext((prev) => [
-          ...prev,
-          `Player action: ${playerAction}`,
-          content,
-        ]);
+        if (currentPrompt === 5) {
+          setStoryContext((prev) => [
+            ...prev,
+            `Player action: ${playerAction}`,
+          ]);
 
-        setAIResponse(content);
-        console.log(currentPrompt + 1);
-        setCurrentPrompt((prev) => prev + 1);
-        console.log(currentPrompt);
+          handleEnding();
+          console.log("finish");
+        } else {
+          setStoryContext((prev) => [
+            ...prev,
+            `Player action: ${playerAction}`,
+            content,
+          ]);
 
-        summarizeStoryForImage(content);
+          setAIResponse(content);
+          console.log(currentPrompt + 1);
+          setCurrentPrompt((prev) => prev + 1);
+          console.log(currentPrompt);
+
+          summarizeStoryForImage(content);
+        }
+        // move above, if 5only player action
       }
-
-      if (currentPrompt === 5) {
-        handleEnding();
-        console.log("finish");
-      }
-      // move above, if 5only player action
     } catch (err) {
       console.error("Error processing the action:", err);
       setError("Failed to process the action. Please try again.");
@@ -222,9 +227,11 @@ const GamePage = () => {
         },
       ]);
 
+      setStoryContext((prev) => [...prev, `Ending: ${ending}`]);
       setAIResponse(ending);
-      setIsStoryComplete(true);
-      summarizeStoryForImage(ending);
+      setIsStoryComplete(true); // Mark the story as complete
+      typeStory(ending); // Ensure the ending is typed out
+      summarizeStoryForImage(ending); // Generate an image for the ending
       console.log(ending);
       console.log("Story end", storyContext);
     } catch (err) {
@@ -288,7 +295,7 @@ const GamePage = () => {
               {typedText || "Loading story..."}
             </p>
           </div>
-          {currentPrompt <= 5 && (
+          {!isStoryComplete && currentPrompt <= 5 && (
             <div className="player-input">
               <input
                 type="text"
@@ -324,6 +331,11 @@ const GamePage = () => {
           </div>
         </div>
       )}
+      <div>
+        <button onClick={() => console.log(storyContext)}>
+          show current context
+        </button>
+      </div>
     </div>
   );
 };
