@@ -101,11 +101,10 @@ const TitleScreen = () => {
   const handleStartGame = () => {
     const audio = audioRef.current;
 
-    // Fade out the background music
     if (audio) {
-      const fadeDuration = 1000; // Duration for fade-out in milliseconds
-      const fadeStep = 0.05; // Decrease volume by 0.05 per step
-      const interval = fadeDuration / (audio.volume / fadeStep); // Calculate interval for each step
+      const fadeDuration = 1000;
+      const fadeStep = 0.05;
+      const interval = fadeDuration / (audio.volume / fadeStep);
 
       const fadeOut = setInterval(() => {
         if (audio.volume > 0) {
@@ -117,11 +116,10 @@ const TitleScreen = () => {
       }, interval);
     }
 
-    // Start transition
     setIsTransitioning(true);
     setTimeout(() => {
       navigate("/game");
-    }, 1000); // Match the transition timing
+    }, 1000);
   };
 
   return (
@@ -138,7 +136,7 @@ const TitleScreen = () => {
       transition={{ duration: 0.5 }}
     >
       {/* Particle Effect */}
-      <Particles
+      {/* <Particles
         id="tsparticles"
         options={{
           particles: {
@@ -152,7 +150,7 @@ const TitleScreen = () => {
             events: { onhover: { enable: true, mode: "repulse" } },
           },
         }}
-      />
+      /> */}
 
       <motion.div
         className="absolute inset-0 bg-black opacity-70 z-0"

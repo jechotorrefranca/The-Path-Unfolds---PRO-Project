@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import Groq from "groq-sdk";
 import GenreSelection from "./GenreSelection";
+import { usePollinationsImage } from "@pollinations/react";
+import "./Game.css";
 
 const groq = new Groq({
   apiKey: process.env.REACT_APP_GROQ_API_KEY,
@@ -21,8 +23,34 @@ const GamePage = () => {
   const [showModal, setShowModal] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
   const [invalidContent, setInvalidContent] = useState("");
+  const [isImageLoading, setIsImageLoading] = useState(true);
+  const [imageGenText, setImageGenText] = useState();
+  const [currentImage, setCurrentImage] = useState();
+  const [prevImage, setPrevImage] = useState();
 
-  const backgroundImageUrl = "https://via.placeholder.com/1200x800";
+  const backgroundImageUrl = usePollinationsImage(imageGenText, {
+    width: 1280,
+    height: 720,
+    model: "flux",
+  });
+
+  useEffect(() => {
+    if (backgroundImageUrl) {
+      const img = new Image();
+      img.src = backgroundImageUrl;
+
+      img.onload = () => {
+        setIsImageLoading(false); // Image is fully loaded
+      };
+
+      img.onerror = () => {
+        console.error("Error loading background image.");
+        setIsImageLoading(true); // Keep placeholder if error
+      };
+    } else {
+      setIsImageLoading(true); // No URL, use placeholder
+    }
+  }, [backgroundImageUrl]);
 
   useEffect(() => {
     if (aiResponse && !isStoryComplete) {
@@ -45,7 +73,7 @@ const GamePage = () => {
       const validationResponse = await validateGenre(selectedGenre);
       if (validationResponse.includes("INVALID_GENRE")) {
         setError("Invalid genre selected. Please choose a valid genre.");
-        setGenre(null); // Reset genre to prompt re-selection
+        setGenre(null);
         return;
       }
 
@@ -90,7 +118,7 @@ const GamePage = () => {
         {
           role: "system",
           content:
-            "You are an AI summarizer. Condense the following text into a concise prompt suitable for generating an image. Keep the summary short and relevant to the key themes, avoiding unnecessary details. Make the prompt less than 20 words",
+            "You are an AI summarizer. Condense the following text into a concise prompt suitable for generating an image. Keep the summary short and relevant to the key themes, avoiding unnecessary details. Make the prompt less than 20 words and make sure its in artistic style",
         },
         {
           role: "user",
@@ -98,7 +126,6 @@ const GamePage = () => {
         },
       ]);
 
-      // Call your image generation function here with the summary
       generateImageFromSummary(summary);
     } catch (err) {
       console.error("Error summarizing the story for image:", err);
@@ -107,12 +134,8 @@ const GamePage = () => {
 
   const generateImageFromSummary = async (summary) => {
     try {
-      // Call your image generation API here
-      console.log("Generated prompt for image:", summary + "in an anime style");
-
-      // Example: Replace with your image generation API
-      // const imageUrl = await fetchImageFromAPI(summary);
-      // console.log("Image URL:", imageUrl);
+      setImageGenText(summary);
+      console.log("Generated prompt for image:", summary);
     } catch (err) {
       console.error("Error generating image:", err);
     }
@@ -194,13 +217,12 @@ const GamePage = () => {
           ]);
 
           setAIResponse(content);
-          console.log(currentPrompt + 1);
+          // console.log(currentPrompt + 1);
+          // console.log(currentPrompt);
           setCurrentPrompt((prev) => prev + 1);
-          console.log(currentPrompt);
 
           summarizeStoryForImage(content);
         }
-        // move above, if 5only player action
       }
     } catch (err) {
       console.error("Error processing the action:", err);
@@ -229,9 +251,9 @@ const GamePage = () => {
 
       setStoryContext((prev) => [...prev, `Ending: ${ending}`]);
       setAIResponse(ending);
-      setIsStoryComplete(true); // Mark the story as complete
-      typeStory(ending); // Ensure the ending is typed out
-      summarizeStoryForImage(ending); // Generate an image for the ending
+      setIsStoryComplete(true);
+      typeStory(ending);
+      summarizeStoryForImage(ending);
       console.log(ending);
       console.log("Story end", storyContext);
     } catch (err) {
@@ -243,7 +265,7 @@ const GamePage = () => {
   const getGroqChatCompletion = async (messages) => {
     const response = await groq.chat.completions.create({
       messages,
-      model: "llama-3.1-70b-versatile", // Specify the model name explicitly
+      model: "llama-3.1-70b-versatile",
     });
     return response.choices[0]?.message?.content || "";
   };
@@ -255,16 +277,16 @@ const GamePage = () => {
       return;
     }
 
-    let index = -1; // Start from the first character
+    let index = -1;
     setIsTyping(true);
-    setTypedText(""); // Initialize the typed text
+    setTypedText("");
 
     const interval = setInterval(() => {
       if (index < story.length) {
-        setTypedText((prev) => prev + story.charAt(index)); // Use `charAt` to ensure valid character
+        setTypedText((prev) => prev + story.charAt(index));
         index++;
       } else {
-        clearInterval(interval); // Clear interval when done
+        clearInterval(interval);
         setIsTyping(false);
       }
     }, 25);
@@ -278,7 +300,9 @@ const GamePage = () => {
     <div
       className="gameplay-container h-screen flex flex-col items-center justify-center"
       style={{
-        backgroundImage: `url(${backgroundImageUrl})`,
+        backgroundImage: isImageLoading
+          ? `url('/Background/placeholder.jpg')`
+          : `url(${backgroundImageUrl})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
       }}
@@ -286,17 +310,14 @@ const GamePage = () => {
       {!genre ? (
         <GenreSelection onSelectGenre={setGenre} />
       ) : (
-        <div className="relative w-full max-w-3xl bg-white bg-opacity-80 p-8 rounded-lg shadow-xl">
-          <h1 className="text-3xl font-bold text-center mb-6">
-            {genre} Adventure
-          </h1>
-          <div className="story-box mb-6">
-            <p className="text-lg leading-relaxed whitespace-pre-wrap text-gray-800">
+        <div className="bottom-panel">
+          <div className="story-box mb-4">
+            <p className="text-lg leading-relaxed whitespace-pre-wrap text-white">
               {typedText || "Loading story..."}
             </p>
           </div>
           {!isStoryComplete && currentPrompt <= 5 && (
-            <div className="player-input">
+            <div className="player-input flex flex-col space-y-2 justify-center items-center">
               <input
                 type="text"
                 value={playerAction}
@@ -307,7 +328,7 @@ const GamePage = () => {
               <button
                 onClick={handlePlayerAction}
                 disabled={isLoading}
-                className="mt-4 py-2 px-6 bg-purple-600 text-white rounded-lg hover:bg-purple-700 focus:outline-none"
+                className="py-2 px-10 bg-purple-600 text-white rounded-lg hover:bg-purple-700 focus:outline-none w-fit"
               >
                 Submit
               </button>
@@ -332,9 +353,9 @@ const GamePage = () => {
         </div>
       )}
       <div>
-        <button onClick={() => console.log(storyContext)}>
+        {/* <button onClick={() => console.log(storyContext)}>
           show current context
-        </button>
+        </button> */}
       </div>
     </div>
   );
