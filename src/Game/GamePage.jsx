@@ -114,7 +114,7 @@ const GamePage = () => {
   };
 
   const summarizeStoryForImage = async (story) => {
-    const summaryPrompt = `Summarize the following story into a short and concise prompt for image generation, and must match with the context of the story: \n${story}`;
+    const summaryPrompt = `Summarize the following story into a short and concise prompt for image generation: \n${story}`;
 
     try {
       const summary = await getGroqChatCompletion([
