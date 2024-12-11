@@ -110,7 +110,7 @@ const GamePage = () => {
         {
           role: "system",
           content:
-            "You are an AI summarizer. Condense the following text into a concise prompt suitable for generating an image. Keep the summary short and relevant to the key themes and most importantly the details of the story, avoiding unnecessary details. Make the prompt less than 30 words and make sure its in artistic style.",
+            "You are an AI summarizer. Condense the following text into a concise prompt suitable for generating an image. Keep the summary short and relevant to the key themes and most importantly the details and the main character of the story, avoiding unnecessary details. Make the prompt less than 25 words.",
         },
         {
           role: "user",
@@ -177,7 +177,7 @@ const GamePage = () => {
         {
           role: "system",
           content:
-            "You are an AI storyteller validating actions in an interactive adventure game, use simple wwords to understand easier. Progress the story only if the action aligns with the narrative’s logic and is appropriate. Provide hints or subtly indicate actions, such as discovering items or paths within the story. Decide if the player's action results in a positive or negative outcome. If the action is illogical or inappropriate, respond with 'ACTION_NOT_POSSIBLE' and a brief explanation.",
+            "You are an AI storyteller validating actions in an interactive adventure game don't say it's a valid action if it is, just narrate the story continuation, use simple wwords to understand easier. Progress the story only if the action aligns with the narrative’s logic and is appropriate. Provide hints or subtly indicate actions, such as discovering items or paths within the story, make sure it is noticeable and not too vague. Decide if the player's action results in a positive or negative outcome. If the action is illogical or inappropriate, respond with 'ACTION_NOT_POSSIBLE' and a brief explanation.",
         },
         {
           role: "user",
@@ -228,7 +228,7 @@ const GamePage = () => {
         {
           role: "system",
           content:
-            "You are an AI storyteller tasked with creating an ending based on the player's actions and the context of the story. Determine whether the player receives a good or bad ending, considering their choices. Ensure the conclusion is well-defined and appropriate to the narrative, make sure it is under 100 words.",
+            "You are an AI storyteller tasked with creating an ending based on the player's actions and the context of the story. Determine whether the player receives a good or bad ending considering their choices without actually saying it's a good/bad ending. Ensure the conclusion is well-defined and appropriate to the narrative, make sure it is under 100 words.",
         },
         {
           role: "user",
@@ -281,7 +281,7 @@ const GamePage = () => {
                 key={aiResponse || "loading"}
                 words={aiResponse ? [aiResponse] : ["Loading story..."]}
                 loop={1}
-                typeSpeed={20}
+                typeSpeed={50}
                 deleteSpeed={50}
                 cursor
               />
