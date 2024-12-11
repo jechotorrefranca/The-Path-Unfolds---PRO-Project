@@ -33,21 +33,24 @@ const GamePage = () => {
     model: "flux",
   });
 
+  console.log(backgroundImageUrl);
+
   useEffect(() => {
+    console.log(backgroundImageUrl);
     if (backgroundImageUrl) {
       const img = new Image();
       img.src = backgroundImageUrl;
 
       img.onload = () => {
-        setIsImageLoading(false); // Image is fully loaded
+        setIsImageLoading(false);
       };
 
       img.onerror = () => {
         console.error("Error loading background image.");
-        setIsImageLoading(true); // Keep placeholder if error
+        setIsImageLoading(true);
       };
     } else {
-      setIsImageLoading(true); // No URL, use placeholder
+      setIsImageLoading(true);
     }
   }, [backgroundImageUrl]);
 
@@ -107,7 +110,7 @@ const GamePage = () => {
         {
           role: "system",
           content:
-            "You are an AI summarizer. Condense the following text into a concise prompt suitable for generating an image. Keep the summary short and relevant to the key themes, avoiding unnecessary details. Make the prompt less than 20 words and make sure its in artistic style.",
+            "You are an AI summarizer. Condense the following text into a concise prompt suitable for generating an image. Keep the summary short and relevant to the key themes and most importantly the details of the story, avoiding unnecessary details. Make the prompt less than 30 words and make sure its in artistic style.",
         },
         {
           role: "user",
@@ -123,6 +126,7 @@ const GamePage = () => {
 
   const generateImageFromSummary = async (summary) => {
     try {
+      setImageGenText("");
       setImageGenText(summary);
       console.log("Generated prompt for image:", summary);
     } catch (err) {
