@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import Groq from "groq-sdk";
 import GenreSelection from "./GenreSelection";
 import { usePollinationsImage } from "@pollinations/react";
+import { Typewriter } from "react-simple-typewriter"; // Import Typewriter
 import "./Game.css";
 
 const groq = new Groq({
@@ -18,8 +19,6 @@ const GamePage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [isStoryComplete, setIsStoryComplete] = useState(false);
-  const [isTyping, setIsTyping] = useState(false);
-  const [typedText, setTypedText] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
   const [invalidContent, setInvalidContent] = useState("");
@@ -33,9 +32,6 @@ const GamePage = () => {
     height: 720,
     model: "flux",
   });
-
-  console.log(imageGenText);
-  console.log(backgroundImageUrl);
 
   useEffect(() => {
     if (backgroundImageUrl) {
@@ -56,12 +52,6 @@ const GamePage = () => {
   }, [backgroundImageUrl]);
 
   useEffect(() => {
-    if (aiResponse && !isStoryComplete) {
-      typeStory(aiResponse);
-    }
-  }, [aiResponse]);
-
-  useEffect(() => {
     if (genre) {
       handleGenreSelection(genre);
     }
@@ -72,7 +62,6 @@ const GamePage = () => {
     setError("");
 
     try {
-      // Validate the selected genre
       const validationResponse = await validateGenre(selectedGenre);
       if (validationResponse.includes("INVALID_GENRE")) {
         setError("Invalid genre selected. Please choose a valid genre.");
@@ -80,7 +69,6 @@ const GamePage = () => {
         return;
       }
 
-      // If genre is valid, start the story
       await startStory(selectedGenre);
     } catch (err) {
       console.error("Error handling genre selection:", err);
@@ -104,8 +92,6 @@ const GamePage = () => {
         },
       ]);
 
-      console.log(response);
-
       return response.trim();
     } catch (err) {
       console.error("Error validating genre:", err);
@@ -121,7 +107,7 @@ const GamePage = () => {
         {
           role: "system",
           content:
-            "You are an AI summarizer. Condense the following text into a concise prompt suitable for generating an image. Keep the summary short and relevant to the key themes, avoiding unnecessary details. Make the prompt less than 20 words and make sure its in artistic style",
+            "You are an AI summarizer. Condense the following text into a concise prompt suitable for generating an image. Keep the summary short and relevant to the key themes, avoiding unnecessary details. Make the prompt less than 20 words and make sure its in artistic style.",
         },
         {
           role: "user",
@@ -155,7 +141,7 @@ const GamePage = () => {
         },
         {
           role: "user",
-          content: `Begin a ${genre} adventure story. Set the stage and introduce the first challenge. Make sure it is under 75 words`,
+          content: `Begin a ${genre} adventure story. Set the stage and introduce the first challenge. Make sure it is under 75 words.`,
         },
       ]);
 
@@ -211,7 +197,6 @@ const GamePage = () => {
           ]);
 
           handleEnding();
-          console.log("finish");
         } else {
           setStoryContext((prev) => [
             ...prev,
@@ -220,10 +205,7 @@ const GamePage = () => {
           ]);
 
           setAIResponse(content);
-          // console.log(currentPrompt + 1);
-          // console.log(currentPrompt);
           setCurrentPrompt((prev) => prev + 1);
-
           summarizeStoryForImage(content);
         }
       }
@@ -255,10 +237,7 @@ const GamePage = () => {
       setStoryContext((prev) => [...prev, `Ending: ${ending}`]);
       setAIResponse(ending);
       setIsStoryComplete(true);
-      typeStory(ending);
       summarizeStoryForImage(ending);
-      console.log(ending);
-      console.log("Story end", storyContext);
     } catch (err) {
       console.error("Error generating the ending:", err);
       setError("Failed to generate the ending. Please try again.");
@@ -271,28 +250,6 @@ const GamePage = () => {
       model: "llama-3.1-70b-versatile",
     });
     return response.choices[0]?.message?.content || "";
-  };
-
-  const typeStory = (story) => {
-    if (!story || story === "undefined") {
-      setTypedText("Error: Unable to fetch story.");
-      setIsTyping(false);
-      return;
-    }
-
-    let index = -1;
-    setIsTyping(true);
-    setTypedText("");
-
-    const interval = setInterval(() => {
-      if (index < story.length) {
-        setTypedText((prev) => prev + story.charAt(index));
-        index++;
-      } else {
-        clearInterval(interval);
-        setIsTyping(false);
-      }
-    }, 25);
   };
 
   const closeModal = () => {
@@ -316,7 +273,14 @@ const GamePage = () => {
         <div className="bottom-panel">
           <div className="story-box mb-4">
             <p className="text-lg leading-relaxed whitespace-pre-wrap text-white">
-              {typedText || "Loading story..."}
+              <Typewriter
+                key={aiResponse || "loading"}
+                words={aiResponse ? [aiResponse] : ["Loading story..."]}
+                loop={1}
+                typeSpeed={20}
+                deleteSpeed={50}
+                cursor
+              />
             </p>
           </div>
           {!isStoryComplete && currentPrompt <= 5 && (
@@ -355,11 +319,6 @@ const GamePage = () => {
           </div>
         </div>
       )}
-      <div>
-        {/* <button onClick={() => console.log(storyContext)}>
-          show current context
-        </button> */}
-      </div>
     </div>
   );
 };
