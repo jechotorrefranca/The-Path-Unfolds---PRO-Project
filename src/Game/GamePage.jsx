@@ -51,7 +51,6 @@ const GamePage = () => {
         img.onload = () => {
           clearTimeout(loadTimeout);
           setNewImage(backgroundImageUrl);
-          P;
           setIsImageLoading(false);
           console.log("Image loaded successfully.");
           setInputShow(true);
