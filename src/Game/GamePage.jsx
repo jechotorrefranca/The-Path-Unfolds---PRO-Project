@@ -1,20 +1,14 @@
 import React, { useState, useEffect } from "react";
 import Groq from "groq-sdk";
 import GenreSelection from "./GenreSelection";
-import { createProdia } from "prodia";
-import { Typewriter } from "react-simple-typewriter";
+import { usePollinationsImage } from "@pollinations/react";
+import { Typewriter } from "react-simple-typewriter"; // Import Typewriter
 import "./Game.css";
 
 const groq = new Groq({
   apiKey: process.env.REACT_APP_GROQ_API_KEY,
   dangerouslyAllowBrowser: true,
 });
-
-const prodia = createProdia({
-  apiKey: process.env.REACT_APP_PRODIA_API_KEY,
-});
-
-//
 
 const GamePage = () => {
   const [genre, setGenre] = useState(null);
@@ -32,6 +26,33 @@ const GamePage = () => {
   const [imageGenText, setImageGenText] = useState();
   const [currentImage, setCurrentImage] = useState();
   const [prevImage, setPrevImage] = useState();
+
+  const backgroundImageUrl = usePollinationsImage(imageGenText, {
+    width: 1280,
+    height: 720,
+    model: "flux",
+  });
+
+  console.log(backgroundImageUrl);
+
+  useEffect(() => {
+    console.log(backgroundImageUrl);
+    if (backgroundImageUrl) {
+      const img = new Image();
+      img.src = backgroundImageUrl;
+
+      img.onload = () => {
+        setIsImageLoading(false);
+      };
+
+      img.onerror = () => {
+        console.error("Error loading background image.");
+        setIsImageLoading(true);
+      };
+    } else {
+      setIsImageLoading(true);
+    }
+  }, [backgroundImageUrl]);
 
   useEffect(() => {
     if (genre) {
@@ -82,14 +103,14 @@ const GamePage = () => {
   };
 
   const summarizeStoryForImage = async (story) => {
-    const summaryPrompt = `Summarize the following story into a short and concise prompt for image generation: \n${story}`;
+    const summaryPrompt = `Please summarize the following text into a concise prompt for image generation. Focus on the main character, key themes, and genre, ensuring accuracy and relevance. Keep it detailed yet concise, between 30 and 50 words, highlighting the core elements without including unnecessary information: \n${story}`;
 
     try {
       const summary = await getGroqChatCompletion([
         {
           role: "system",
           content:
-            "You are an AI summarizer. Condense the following text into a concise prompt suitable for generating an image. Keep the summary short and relevant to the key themes and most importantly the details and the main character of the story, avoiding unnecessary details. Make the prompt detailed about the chracters and the genre of the story, make sure it is less than 50 words.",
+            "You are an accurate story summarizer for an image generation AI, make the sentence understandable and should match the theme of the story",
         },
         {
           role: "user",
@@ -105,25 +126,11 @@ const GamePage = () => {
 
   const generateImageFromSummary = async (summary) => {
     try {
-      setIsImageLoading(true);
+      setImageGenText("");
       setImageGenText(summary);
-
-      const job = await prodia.generate({
-        prompt: summary,
-      });
-
-      const { imageUrl, status } = await prodia.wait(job);
-
-      if (status === "success") {
-        setCurrentImage(imageUrl);
-      } else {
-        throw new Error("Image generation failed.");
-      }
+      console.log("Generated prompt for image:", summary);
     } catch (err) {
       console.error("Error generating image:", err);
-      setCurrentImage("/Background/placeholder.jpg");
-    } finally {
-      setIsImageLoading(false);
     }
   };
 
@@ -176,7 +183,7 @@ const GamePage = () => {
           role: "user",
           content: `Current story context: ${storyContext.join(
             "\n"
-          )}\nPlayer action: ${playerAction}\nContinue the story if the action is valid, make sure the story is under 50 words. If invalid, respond with 'ACTION_NOT_POSSIBLE' and a brief explanation.`,
+          )}\nPlayer action: ${playerAction}\nContinue the story if the action is valid, make sure the story is under 50 words. just narrate the story continuation, use simple wwords to understand easier. Progress the story only if the action aligns with the narrative’s logic and is appropriate. Provide hints or subtly indicate actions, such as discovering items or paths within the story, make sure it is noticeable and not too vague. Decide if the player's action results in a positive or negative outcome. If the action is illogical or inappropriate, respond with 'ACTION_NOT_POSSIBLE' and a brief explanation."`,
         },
       ]);
 
@@ -260,7 +267,7 @@ const GamePage = () => {
       style={{
         backgroundImage: isImageLoading
           ? `url('/Background/placeholder.jpg')`
-          : `url(${currentImage})`,
+          : `url(${backgroundImageUrl})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
       }}
