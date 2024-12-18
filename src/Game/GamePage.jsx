@@ -46,14 +46,13 @@ const GamePage = () => {
         const img = new Image();
         img.src = backgroundImageUrl;
 
-        // Start a timeout for 10 seconds to restart the loading process
         loadTimeout = setTimeout(() => {
           console.warn("Image loading is taking too long. Restarting...");
           loadImage();
-        }, 10000); // 10 seconds
+        }, 10000);
 
         img.onload = () => {
-          clearTimeout(loadTimeout); // Clear the timeout if the image loads successfully
+          clearTimeout(loadTimeout);
           setNewImage(backgroundImageUrl);
           setCurrentImage(backgroundImageUrl);
           setIsImageLoading(false);
@@ -62,7 +61,7 @@ const GamePage = () => {
         };
 
         img.onerror = () => {
-          clearTimeout(loadTimeout); // Clear the timeout if an error occurs
+          clearTimeout(loadTimeout);
           console.error("Error loading background image.");
           setIsImageLoading(true);
           retryTimeout = setTimeout(() => {
