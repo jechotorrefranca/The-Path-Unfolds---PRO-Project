@@ -24,8 +24,10 @@ const GamePage = () => {
   const [invalidContent, setInvalidContent] = useState("");
   const [isImageLoading, setIsImageLoading] = useState(true);
   const [imageGenText, setImageGenText] = useState();
-  const [currentImage, setCurrentImage] = useState();
-  const [prevImage, setPrevImage] = useState();
+  const [currentImage, setCurrentImage] = useState(
+    "/Background/placeholder.jpg"
+  );
+  const [newImage, setNewImage] = useState();
 
   const backgroundImageUrl = usePollinationsImage(imageGenText, {
     width: 1280,
@@ -33,26 +35,45 @@ const GamePage = () => {
     model: "flux",
   });
 
-  console.log(backgroundImageUrl);
+  useEffect(() => {
+    let retryTimeout;
+
+    const loadImage = () => {
+      if (backgroundImageUrl) {
+        console.log(`Attempting to load image: ${backgroundImageUrl}`);
+        const img = new Image();
+        img.src = backgroundImageUrl;
+
+        img.onload = () => {
+          setNewImage(backgroundImageUrl);
+          setIsImageLoading(false);
+          console.log("Image loaded successfully.");
+        };
+
+        img.onerror = () => {
+          console.error("Error loading background image.");
+          setIsImageLoading(true);
+          retryTimeout = setTimeout(() => {
+            console.log("Retrying image load...");
+            loadImage();
+          }, 1500);
+        };
+      }
+    };
+
+    loadImage();
+
+    return () => {
+      clearTimeout(retryTimeout);
+    };
+  }, [backgroundImageUrl]);
 
   useEffect(() => {
-    console.log(backgroundImageUrl);
-    if (backgroundImageUrl) {
-      const img = new Image();
-      img.src = backgroundImageUrl;
-
-      img.onload = () => {
-        setIsImageLoading(false);
-      };
-
-      img.onerror = () => {
-        console.error("Error loading background image.");
-        setIsImageLoading(true);
-      };
-    } else {
-      setIsImageLoading(true);
+    if (newImage) {
+      setCurrentImage(newImage);
+      setNewImage(null);
     }
-  }, [backgroundImageUrl]);
+  }, [newImage]);
 
   useEffect(() => {
     if (genre) {
@@ -103,14 +124,16 @@ const GamePage = () => {
   };
 
   const summarizeStoryForImage = async (story) => {
-    const summaryPrompt = `Please summarize the following text into a concise prompt for image generation. Focus on the main character, key themes, and genre, ensuring accuracy and relevance. Keep it detailed yet concise, between 30 and 50 words, highlighting the core elements without including unnecessary information: \n${story}`;
+    const summaryPrompt = `Please summarize the following text into a concise prompt for image generation. 
+    Focus on the main character, key themes, and genre, ensuring accuracy and relevance. 
+    Keep it detailed yet concise, between 30 and 50 words, highlighting the core elements without including unnecessary information: \n${story}`;
 
     try {
       const summary = await getGroqChatCompletion([
         {
           role: "system",
-          content:
-            "You are an accurate story summarizer for an image generation AI, make the sentence understandable and should match the theme of the story",
+          content: `You are an accurate story summarizer for an image generation AI, 
+            make the sentence understandable and should match the theme of the story`,
         },
         {
           role: "user",
@@ -176,14 +199,19 @@ const GamePage = () => {
       const response = await getGroqChatCompletion([
         {
           role: "system",
-          content:
-            "You are an AI storyteller validating actions in an interactive adventure game don't say it's a valid action if it is, just narrate the story continuation, use simple wwords to understand easier. Progress the story only if the action aligns with the narrative’s logic and is appropriate. Provide hints or subtly indicate actions, such as discovering items or paths within the story, make sure it is noticeable and not too vague. Decide if the player's action results in a positive or negative outcome. If the action is illogical or inappropriate, respond with 'ACTION_NOT_POSSIBLE' and a brief explanation.",
+          content: `You are an AI storyteller validating actions in an interactive adventure 
+            game, don't say it's a valid action, if it is, continue the story, and if invalid, 
+            respond with 'ACTION_NOT_POSSIBLE' and a brief explanation.`,
         },
         {
           role: "user",
           content: `Current story context: ${storyContext.join(
             "\n"
-          )}\nPlayer action: ${playerAction}\nContinue the story if the action is valid, make sure the story is under 50 words. just narrate the story continuation, use simple wwords to understand easier. Progress the story only if the action aligns with the narrative’s logic and is appropriate. Provide hints or subtly indicate actions, such as discovering items or paths within the story, make sure it is noticeable and not too vague. Decide if the player's action results in a positive or negative outcome. If the action is illogical or inappropriate, respond with 'ACTION_NOT_POSSIBLE' and a brief explanation."`,
+          )}\nPlayer action: ${playerAction}\nContinue the story if the action is valid, make sure the story is under 50 words. 
+          Just narrate the story continuation, use simple wwords to understand easier. Progress the story only if the action aligns 
+          with the narrative’s logic and is appropriate. Provide hints or subtly indicate actions, such as discovering items or paths within the story,
+           make sure it is noticeable and not too vague. Decide if the player's action results in a positive or negative outcome. 
+           If the action is illogical or inappropriate, respond with 'ACTION_NOT_POSSIBLE' and a brief explanation."`,
         },
       ]);
 
@@ -265,9 +293,7 @@ const GamePage = () => {
     <div
       className="gameplay-container h-screen flex flex-col items-center justify-center"
       style={{
-        backgroundImage: isImageLoading
-          ? `url('/Background/placeholder.jpg')`
-          : `url(${backgroundImageUrl})`,
+        backgroundImage: `url(${currentImage})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
       }}

@@ -76,12 +76,12 @@ const GenreSelection = ({ onSelectGenre }) => {
             value={customGenre}
             onChange={(e) => setCustomGenre(e.target.value)}
             placeholder="Or type your own genre..."
-            className="w-full max-w-lg py-2 px-4 mb-4 rounded-lg bg-gray-800 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
+            className="w-full max-w-lg py-2 px-4 mb-4 rounded-full bg-gray-800 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
           />
           <button
             onClick={() => handleGenreSelect(customGenre)}
             type="submit"
-            className="py-2 px-6 bg-purple-600 rounded-lg shadow-md hover:bg-purple-700 text-white"
+            className="py-2 px-6 bg-purple-600 rounded-full shadow-md hover:bg-purple-700 text-white"
           >
             Submit
           </button>

@@ -1,6 +1,4 @@
-/* Visual Novel Style Modal */
 .modal-overlay {
-  font-family: "MorrisRomanBlack", serif;
   position: fixed;
   top: 0;
   left: 0;
@@ -21,13 +19,13 @@
   width: 100%;
   color: white;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-  border: 3px solid #8a6fff; /* Light purple border to match a visual novel theme */
+  border: 3px solid #8a6fff;
 }
 
 .modal-header {
   text-align: center;
   font-size: 2.5rem;
-  font-family: "BreeSerif", serif; /* Elegant font for titles */
+  font-family: "BreeSerif", serif;
   margin-bottom: 1rem;
   color: #d8b2ff;
 }
@@ -61,10 +59,9 @@
   outline: none;
 }
 
-/* Styling for checkboxes */
 .modal-checkbox {
   margin-left: 1rem;
-  accent-color: #8a6fff; /* Purple accent for the checkbox */
+  accent-color: #8a6fff;
 }
 
 /* Buttons */
@@ -130,6 +127,6 @@
 }
 
 .modal-input[type="range"]:active::-webkit-slider-thumb {
-  background-color: #6b4cfc; /* Darker when clicked */
-  transform: scale(1.1); /* Slightly enlarge when clicked */
+  background-color: #6b4cfc;
+  transform: scale(1.1);
 }
