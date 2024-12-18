@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import Groq from "groq-sdk";
 import GenreSelection from "./GenreSelection";
+import debounce from "lodash/debounce";
+
 import { usePollinationsImage } from "@pollinations/react";
 import { Typewriter } from "react-simple-typewriter";
 import "./Game.css";
@@ -46,15 +48,10 @@ const GamePage = () => {
         const img = new Image();
         img.src = backgroundImageUrl;
 
-        loadTimeout = setTimeout(() => {
-          console.warn("Image loading is taking too long. Restarting...");
-          loadImage();
-        }, 10000);
-
         img.onload = () => {
           clearTimeout(loadTimeout);
           setNewImage(backgroundImageUrl);
-          setCurrentImage(backgroundImageUrl);
+          P;
           setIsImageLoading(false);
           console.log("Image loaded successfully.");
           setInputShow(true);
@@ -69,13 +66,11 @@ const GamePage = () => {
             loadImage();
           }, 3000);
         };
-      } else {
-        console.warn("Background image URL is invalid or undefined.");
-        setIsImageLoading(true);
-        retryTimeout = setTimeout(() => {
-          console.log("Retrying image load with updated URL...");
+
+        loadTimeout = setTimeout(() => {
+          console.warn("Image loading is taking too long. Restarting...");
           loadImage();
-        }, 3000);
+        }, 20000);
       }
     };
 
@@ -83,14 +78,13 @@ const GamePage = () => {
 
     return () => {
       clearTimeout(retryTimeout);
-      clearTimeout(loadTimeout); // Ensure timeouts are cleared to prevent memory leaks
+      clearTimeout(loadTimeout);
     };
   }, [backgroundImageUrl]);
 
   useEffect(() => {
     if (newImage) {
       setCurrentImage(newImage);
-      setNewImage(null);
       console.log("wahoooo");
     }
   }, [newImage]);
@@ -167,10 +161,13 @@ const GamePage = () => {
     }
   };
 
+  const debounceSetImageGenText = debounce((text) => {
+    setImageGenText(text);
+  }, 300);
+
   const generateImageFromSummary = async (summary) => {
     try {
-      setImageGenText("");
-      setImageGenText(summary);
+      debounceSetImageGenText(summary);
       console.log("Generated prompt for image:", summary);
     } catch (err) {
       console.error("Error generating image:", err);
@@ -310,6 +307,20 @@ const GamePage = () => {
     setShowModal(false);
   };
 
+  const handlePlayAgain = () => {
+    setGenre(null);
+    setStoryContext([]);
+    setAIResponse("");
+    setCurrentPrompt(1);
+    setPlayerAction("");
+    setIsLoading(false);
+    setError("");
+    setIsStoryComplete(false);
+    setShowModal(false);
+    setInvalidContent("");
+    setCurrentImage("/Background/placeholder.jpg");
+  };
+
   return (
     <div
       className="gameplay-container h-screen flex flex-col items-center justify-center"
@@ -357,6 +368,16 @@ const GamePage = () => {
             </div>
           )}
           {error && <p className="text-red-500 text-center mt-4">{error}</p>}
+          {isStoryComplete && (
+            <div className="flex justify-center mt-5">
+              <button
+                onClick={handlePlayAgain}
+                className="py-2 px-5 bg-purple-600 text-white rounded-full hover:bg-purple-700 focus:outline-none"
+              >
+                Play Again
+              </button>
+            </div>
+          )}
         </div>
       )}
       {showModal && (
