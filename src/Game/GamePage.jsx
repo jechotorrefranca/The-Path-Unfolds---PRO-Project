@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import Groq from "groq-sdk";
 import GenreSelection from "./GenreSelection";
 import { usePollinationsImage } from "@pollinations/react";
-import { Typewriter } from "react-simple-typewriter"; // Import Typewriter
+import { Typewriter } from "react-simple-typewriter";
 import "./Game.css";
 
 const groq = new Groq({
@@ -276,31 +276,30 @@ const GamePage = () => {
         <GenreSelection onSelectGenre={setGenre} />
       ) : (
         <div className="bottom-panel">
-          <div className="story-box mb-4">
-            <p className="text-lg leading-relaxed whitespace-pre-wrap text-white">
+          <div className="story-box mb-4 px-10">
+            <p className="text-2xl leading-relaxed whitespace-pre-wrap text-white text-center">
               <Typewriter
                 key={aiResponse || "loading"}
                 words={aiResponse ? [aiResponse] : ["Loading story..."]}
                 loop={1}
                 typeSpeed={50}
                 deleteSpeed={50}
-                cursor
               />
             </p>
           </div>
           {!isStoryComplete && currentPrompt <= 5 && (
-            <div className="player-input flex flex-col space-y-2 justify-center items-center">
+            <div className="player-input flex justify-center items-center bg-zinc-900 p-3 rounded-full gap-3">
               <input
                 type="text"
                 value={playerAction}
                 onChange={(e) => setPlayerAction(e.target.value)}
                 placeholder="What will you do next?"
-                className="w-full p-2 rounded-lg bg-gray-200 focus:outline-none"
+                className="w-full p-2 rounded-full bg-transparent focus:outline-none focus:ring-2 focus:ring-purple-500 text-2xl px-5 text-white"
               />
               <button
                 onClick={handlePlayerAction}
                 disabled={isLoading}
-                className="py-2 px-10 bg-purple-600 text-white rounded-lg hover:bg-purple-700 focus:outline-none w-fit"
+                className="py-2 px-5 bg-purple-600 text-white rounded-full hover:bg-purple-700 focus:outline-none w-fit"
               >
                 Submit
               </button>

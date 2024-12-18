@@ -135,23 +135,6 @@ const TitleScreen = () => {
       animate={{ opacity: isTransitioning ? 0 : 1 }}
       transition={{ duration: 0.5 }}
     >
-      {/* Particle Effect */}
-      {/* <Particles
-        id="tsparticles"
-        options={{
-          particles: {
-            number: { value: 100, density: { enable: true, value_area: 800 } },
-            shape: { type: "circle" },
-            opacity: { value: 0.8, random: true },
-            size: { value: 4, random: true },
-            move: { enable: true, speed: 1, random: true },
-          },
-          interactivity: {
-            events: { onhover: { enable: true, mode: "repulse" } },
-          },
-        }}
-      /> */}
-
       <motion.div
         className="absolute inset-0 bg-black opacity-70 z-0"
         initial={{ opacity: 0 }}
