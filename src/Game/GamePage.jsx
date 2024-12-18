@@ -28,6 +28,7 @@ const GamePage = () => {
     "/Background/placeholder.jpg"
   );
   const [newImage, setNewImage] = useState();
+  const [inputShow, setInputShow] = useState(false);
 
   const backgroundImageUrl = usePollinationsImage(imageGenText, {
     width: 1280,
@@ -37,27 +38,45 @@ const GamePage = () => {
 
   useEffect(() => {
     let retryTimeout;
+    let loadTimeout;
 
     const loadImage = () => {
-      if (backgroundImageUrl) {
+      if (backgroundImageUrl && !backgroundImageUrl.includes("undefined")) {
         console.log(`Attempting to load image: ${backgroundImageUrl}`);
         const img = new Image();
         img.src = backgroundImageUrl;
 
+        // Start a timeout for 10 seconds to restart the loading process
+        loadTimeout = setTimeout(() => {
+          console.warn("Image loading is taking too long. Restarting...");
+          loadImage();
+        }, 10000); // 10 seconds
+
         img.onload = () => {
+          clearTimeout(loadTimeout); // Clear the timeout if the image loads successfully
           setNewImage(backgroundImageUrl);
+          setCurrentImage(backgroundImageUrl);
           setIsImageLoading(false);
           console.log("Image loaded successfully.");
+          setInputShow(true);
         };
 
         img.onerror = () => {
+          clearTimeout(loadTimeout); // Clear the timeout if an error occurs
           console.error("Error loading background image.");
           setIsImageLoading(true);
           retryTimeout = setTimeout(() => {
             console.log("Retrying image load...");
             loadImage();
-          }, 1500);
+          }, 3000);
         };
+      } else {
+        console.warn("Background image URL is invalid or undefined.");
+        setIsImageLoading(true);
+        retryTimeout = setTimeout(() => {
+          console.log("Retrying image load with updated URL...");
+          loadImage();
+        }, 3000);
       }
     };
 
@@ -65,6 +84,7 @@ const GamePage = () => {
 
     return () => {
       clearTimeout(retryTimeout);
+      clearTimeout(loadTimeout); // Ensure timeouts are cleared to prevent memory leaks
     };
   }, [backgroundImageUrl]);
 
@@ -72,6 +92,7 @@ const GamePage = () => {
     if (newImage) {
       setCurrentImage(newImage);
       setNewImage(null);
+      console.log("wahoooo");
     }
   }, [newImage]);
 
@@ -230,6 +251,7 @@ const GamePage = () => {
 
           handleEnding();
         } else {
+          setInputShow(false);
           setStoryContext((prev) => [
             ...prev,
             `Player action: ${playerAction}`,
@@ -313,7 +335,7 @@ const GamePage = () => {
               />
             </p>
           </div>
-          {!isStoryComplete && currentPrompt <= 5 && (
+          {!isStoryComplete && currentPrompt <= 5 && inputShow ? (
             <div className="player-input flex justify-center items-center bg-zinc-900 p-3 rounded-full gap-3">
               <input
                 type="text"
@@ -329,6 +351,10 @@ const GamePage = () => {
               >
                 Submit
               </button>
+            </div>
+          ) : (
+            <div className="flex justify-center text-gray-400 p-10">
+              <p>Loading Image...</p>
             </div>
           )}
           {error && <p className="text-red-500 text-center mt-4">{error}</p>}

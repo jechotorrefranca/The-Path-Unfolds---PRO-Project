@@ -50,7 +50,7 @@ const GenreSelection = ({ onSelectGenre }) => {
       transition={{ duration: 0.8, ease: "easeOut" }}
       className="w-full h-full flex justify-center items-center p-5 bg-zinc-950 overflow-auto"
     >
-      <div className="border border-purple-600 rounded-lg px-5 py-10 ">
+      <div className="border border-purple-600 rounded-lg px-5 py-10 w-full max-w-[60rem]">
         <h1 className="text-4xl font-bold text-center mb-8 text-purple-400">
           Choose Your Genre
         </h1>
