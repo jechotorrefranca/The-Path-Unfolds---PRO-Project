@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from "react";
 import Groq from "groq-sdk";
 import GenreSelection from "./GenreSelection";
-import { usePollinationsImage } from "@pollinations/react";
-import { Typewriter } from "react-simple-typewriter"; // Import Typewriter
+import { createProdia } from "prodia";
+import { Typewriter } from "react-simple-typewriter";
 import "./Game.css";
 
 const groq = new Groq({
   apiKey: process.env.REACT_APP_GROQ_API_KEY,
   dangerouslyAllowBrowser: true,
+});
+
+const prodia = createProdia({
+  apiKey: process.env.REACT_APP_PRODIA_API_KEY,
 });
 
 const GamePage = () => {
@@ -26,33 +30,6 @@ const GamePage = () => {
   const [imageGenText, setImageGenText] = useState();
   const [currentImage, setCurrentImage] = useState();
   const [prevImage, setPrevImage] = useState();
-
-  const backgroundImageUrl = usePollinationsImage(imageGenText, {
-    width: 1280,
-    height: 720,
-    model: "flux",
-  });
-
-  console.log(backgroundImageUrl);
-
-  useEffect(() => {
-    console.log(backgroundImageUrl);
-    if (backgroundImageUrl) {
-      const img = new Image();
-      img.src = backgroundImageUrl;
-
-      img.onload = () => {
-        setIsImageLoading(false);
-      };
-
-      img.onerror = () => {
-        console.error("Error loading background image.");
-        setIsImageLoading(true);
-      };
-    } else {
-      setIsImageLoading(true);
-    }
-  }, [backgroundImageUrl]);
 
   useEffect(() => {
     if (genre) {
@@ -110,7 +87,7 @@ const GamePage = () => {
         {
           role: "system",
           content:
-            "You are an AI summarizer. Condense the following text into a concise prompt suitable for generating an image. Keep the summary short and relevant to the key themes and most importantly the details and the main character of the story, avoiding unnecessary details. Make the prompt less than 25 words.",
+            "You are an AI summarizer. Condense the following text into a concise prompt suitable for generating an image. Keep the summary short and relevant to the key themes and most importantly the details and the main character of the story, avoiding unnecessary details. Make the prompt detailed about the chracters and the genre of the story, make sure it is less than 50 words.",
         },
         {
           role: "user",
@@ -126,11 +103,25 @@ const GamePage = () => {
 
   const generateImageFromSummary = async (summary) => {
     try {
-      setImageGenText("");
+      setIsImageLoading(true);
       setImageGenText(summary);
-      console.log("Generated prompt for image:", summary);
+
+      const job = await prodia.generate({
+        prompt: summary,
+      });
+
+      const { imageUrl, status } = await prodia.wait(job);
+
+      if (status === "success") {
+        setCurrentImage(imageUrl);
+      } else {
+        throw new Error("Image generation failed.");
+      }
     } catch (err) {
       console.error("Error generating image:", err);
+      setCurrentImage("/Background/placeholder.jpg");
+    } finally {
+      setIsImageLoading(false);
     }
   };
 
@@ -234,7 +225,7 @@ const GamePage = () => {
           role: "user",
           content: `Story context:\n${storyContext.join(
             "\n"
-          )}\nGenerate the ending based on the above.`,
+          )}\nGenerate the ending based on the above, make sure to add "The End" at every end.`,
         },
       ]);
 
@@ -242,6 +233,7 @@ const GamePage = () => {
       setAIResponse(ending);
       setIsStoryComplete(true);
       summarizeStoryForImage(ending);
+      console.log(storyContext);
     } catch (err) {
       console.error("Error generating the ending:", err);
       setError("Failed to generate the ending. Please try again.");
@@ -251,7 +243,7 @@ const GamePage = () => {
   const getGroqChatCompletion = async (messages) => {
     const response = await groq.chat.completions.create({
       messages,
-      model: "llama-3.1-70b-versatile",
+      model: "llama-3.3-70b-versatile",
     });
     return response.choices[0]?.message?.content || "";
   };
@@ -266,7 +258,7 @@ const GamePage = () => {
       style={{
         backgroundImage: isImageLoading
           ? `url('/Background/placeholder.jpg')`
-          : `url(${backgroundImageUrl})`,
+          : `url(${currentImage})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
       }}
