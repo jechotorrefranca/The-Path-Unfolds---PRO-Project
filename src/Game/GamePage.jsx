@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Groq from "groq-sdk";
 import GenreSelection from "./GenreSelection";
 import debounce from "lodash/debounce";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowRight } from "@fortawesome/free-solid-svg-icons";
+import { faArrowRight, faGear } from "@fortawesome/free-solid-svg-icons";
 import { usePollinationsImage } from "@pollinations/react";
 import { Typewriter } from "react-simple-typewriter";
+import SettingsModal from "../Components/SettingsModal/Settings";
 import "./Game.css";
 
 const groq = new Groq({
@@ -34,6 +35,79 @@ const GamePage = () => {
   const [newImage, setNewImage] = useState();
   const [inputShow, setInputShow] = useState(false);
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
+  const [isShowSettings, setIsShowSettings] = useState(false);
+
+  // Audio settings
+  const [musicVolume, setMusicVolume] = useState(0.5);
+  const [narratorVolume, setNarratorVolume] = useState(0.5);
+  const [isMuted, setIsMuted] = useState(false);
+
+  const audioRef = useRef(null);
+
+  useEffect(() => {
+    const savedMusicVolume = parseFloat(localStorage.getItem("musicVolume"));
+    const savedNarratorVolume = parseFloat(
+      localStorage.getItem("narratorVolume")
+    );
+    const savedIsMuted = localStorage.getItem("isMuted") === "true";
+
+    if (!isNaN(savedMusicVolume)) setMusicVolume(savedMusicVolume);
+    if (!isNaN(savedNarratorVolume)) setNarratorVolume(savedNarratorVolume);
+    setIsMuted(savedIsMuted);
+  }, []);
+
+  useEffect(() => {
+    if (audioRef.current) {
+      const audio = audioRef.current;
+      if (isMuted) {
+        audio.volume = 0;
+      } else {
+        audio.volume = Math.max(0, Math.min(1, musicVolume));
+      }
+    }
+  }, [musicVolume, isMuted]);
+
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      }
+    };
+  }, []);
+
+  const playMusic = (genre) => {
+    const audio = new Audio(`/assets/InGame Music/${genre}.mp3`);
+    audio.loop = true;
+    audio.volume = isMuted ? 0 : musicVolume;
+    audioRef.current = audio;
+    audio.play().catch((err) => {
+      console.error("Error playing audio:", err);
+    });
+  };
+
+  const saveSettings = (newMusicVolume, newNarratorVolume, newIsMuted) => {
+    setMusicVolume(newMusicVolume);
+    setNarratorVolume(newNarratorVolume);
+    setIsMuted(newIsMuted);
+
+    localStorage.setItem("musicVolume", newMusicVolume);
+    localStorage.setItem("narratorVolume", newNarratorVolume);
+    localStorage.setItem("isMuted", newIsMuted);
+
+    const audio = audioRef.current;
+    if (audio) {
+      audio.volume = newIsMuted ? 0 : newMusicVolume;
+    }
+  };
+
+  const handleShowSettings = () => {
+    setIsShowSettings(true);
+  };
+
+  const closeSettings = () => {
+    setIsShowSettings(false);
+  };
 
   const backgroundImageUrl = usePollinationsImage(imageGenText, {
     width: 1280,
@@ -60,7 +134,7 @@ const GamePage = () => {
 
           if (!isMusicPlaying && musicGenre) {
             playMusic(musicGenre);
-            setIsMusicPlaying(true); // Mark music as playing
+            setIsMusicPlaying(true);
           }
         };
 
@@ -89,10 +163,21 @@ const GamePage = () => {
     };
   }, [backgroundImageUrl]);
 
+  // useEffect(() => {
+  //   if (newImage) {
+  //     setCurrentImage(newImage);
+  //     console.log("wahoooo");
+  //   }
+  // }, [newImage]);
+
   useEffect(() => {
     if (newImage) {
-      setCurrentImage(newImage);
-      console.log("wahoooo");
+      const delay = setTimeout(() => {
+        setCurrentImage(newImage);
+        console.log("wahoooo");
+      }, 500);
+
+      return () => clearTimeout(delay);
     }
   }, [newImage]);
 
@@ -150,7 +235,7 @@ const GamePage = () => {
 
   const summarizeStoryForImage = async (story) => {
     const summaryPrompt = `Please summarize the following text into a concise prompt for image generation. 
-    Focus on the main character, key themes, and genre, ensuring accuracy and relevance. 
+    Focus on the main character, key themes, and genre, ensuring accuracy and relevance, make the artstyle Anime. 
     Keep it detailed yet concise, between 30 and 50 words, highlighting the core elements without including unnecessary information: \n${story}`;
 
     try {
@@ -251,6 +336,7 @@ const GamePage = () => {
         setShowModal(true);
       } else {
         if (currentPrompt === 5) {
+          setInputShow(false);
           setStoryContext((prev) => [
             ...prev,
             `Player action: ${playerAction}`,
@@ -324,12 +410,21 @@ const GamePage = () => {
     setAIResponse("");
     setCurrentPrompt(1);
     setPlayerAction("");
+    setInputShow(false);
     setIsLoading(false);
     setError("");
     setIsStoryComplete(false);
     setShowModal(false);
     setInvalidContent("");
     setCurrentImage("/Background/placeholder.jpg");
+
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      audioRef.current = null;
+    }
+
+    setIsMusicPlaying(false);
   };
 
   const validateAndPlayGenre = async (selectedGenre) => {
@@ -389,29 +484,6 @@ const GamePage = () => {
     }
   };
 
-  const playMusic = (genre) => {
-    const audio = new Audio(`/assets/InGame Music/${genre}.mp3`);
-    const audioContext = new (window.AudioContext ||
-      window.webkitAudioContext)();
-    const gainNode = audioContext.createGain();
-    const source = audioContext.createMediaElementSource(audio);
-
-    // Connect the audio source to the gain node and then to the audio context
-    source.connect(gainNode);
-    gainNode.connect(audioContext.destination);
-
-    // Set initial volume to 0
-    gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-
-    // Fade in the volume over 2 seconds
-    gainNode.gain.linearRampToValueAtTime(1, audioContext.currentTime + 2);
-
-    // Play the audio
-    audio.play().catch((err) => {
-      console.error("Error playing audio:", err);
-    });
-  };
-
   return (
     <div
       className="gameplay-container h-screen flex flex-col items-center justify-center"
@@ -454,21 +526,24 @@ const GamePage = () => {
               </button>
             </div>
           ) : (
-            <div className="flex justify-center text-gray-400 p-10">
-              <p>Loading Image...</p>
-            </div>
+            <>
+              {isStoryComplete && inputShow ? (
+                <div className="flex justify-center mt-5">
+                  <button
+                    onClick={handlePlayAgain}
+                    className="py-2 px-5 bg-purple-600 text-white rounded-full hover:bg-purple-700 focus:outline-none"
+                  >
+                    Play Again
+                  </button>
+                </div>
+              ) : (
+                <div className="flex justify-center text-gray-400 p-10">
+                  <p>Loading Image...</p>
+                </div>
+              )}
+            </>
           )}
           {error && <p className="text-red-500 text-center mt-4">{error}</p>}
-          {isStoryComplete && (
-            <div className="flex justify-center mt-5">
-              <button
-                onClick={handlePlayAgain}
-                className="py-2 px-5 bg-purple-600 text-white rounded-full hover:bg-purple-700 focus:outline-none"
-              >
-                Play Again
-              </button>
-            </div>
-          )}
         </div>
       )}
       {showModal && (
@@ -486,6 +561,22 @@ const GamePage = () => {
           </div>
         </div>
       )}
+
+      <div
+        className="text-purple-400 absolute top-0 left-0 m-5 cursor-pointer text-4xl"
+        onClick={handleShowSettings}
+      >
+        <FontAwesomeIcon icon={faGear} />
+      </div>
+
+      <SettingsModal
+        isOpen={isShowSettings}
+        onClose={closeSettings}
+        onSave={saveSettings}
+        musicVolume={musicVolume}
+        narratorVolume={narratorVolume}
+        isMuted={isMuted}
+      />
     </div>
   );
 };
