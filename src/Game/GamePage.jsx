@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import Groq from "groq-sdk";
 import GenreSelection from "./GenreSelection";
 import debounce from "lodash/debounce";
-
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowRight } from "@fortawesome/free-solid-svg-icons";
 import { usePollinationsImage } from "@pollinations/react";
 import { Typewriter } from "react-simple-typewriter";
 import "./Game.css";
@@ -29,8 +30,10 @@ const GamePage = () => {
   const [currentImage, setCurrentImage] = useState(
     "/Background/placeholder.jpg"
   );
+  const [musicGenre, setMusicGenre] = useState("");
   const [newImage, setNewImage] = useState();
   const [inputShow, setInputShow] = useState(false);
+  const [isMusicPlaying, setIsMusicPlaying] = useState(false);
 
   const backgroundImageUrl = usePollinationsImage(imageGenText, {
     width: 1280,
@@ -54,6 +57,11 @@ const GamePage = () => {
           setIsImageLoading(false);
           console.log("Image loaded successfully.");
           setInputShow(true);
+
+          if (!isMusicPlaying && musicGenre) {
+            playMusic(musicGenre);
+            setIsMusicPlaying(true); // Mark music as playing
+          }
         };
 
         img.onerror = () => {
@@ -103,9 +111,11 @@ const GamePage = () => {
       if (validationResponse.includes("INVALID_GENRE")) {
         setError("Invalid genre selected. Please choose a valid genre.");
         setGenre(null);
+        console.log("GENRE REJECTED");
         return;
       }
 
+      await validateAndPlayGenre(selectedGenre);
       await startStory(selectedGenre);
     } catch (err) {
       console.error("Error handling genre selection:", err);
@@ -121,13 +131,15 @@ const GamePage = () => {
         {
           role: "system",
           content:
-            "You are an AI validator for an interactive adventure game. Validate if the given genre is appropriate for the game, there should be no inappropriate genre. Respond with 'VALID_GENRE' if the genre is valid or 'INVALID_GENRE' with a reason why it is invalid.",
+            "You are an AI validator for an interactive adventure game. Validate if the given genre is appropriate for the game or the theme, there should be no inappropriate genre. Respond with 'VALID_GENRE' if the genre is valid or 'INVALID_GENRE' with a reason why it is invalid.",
         },
         {
           role: "user",
-          content: `Validate the following genre: ${genre}`,
+          content: `Validate the following genre, or a theme genre: ${genre}`,
         },
       ]);
+
+      console.log(response.trim());
 
       return response.trim();
     } catch (err) {
@@ -320,6 +332,86 @@ const GamePage = () => {
     setCurrentImage("/Background/placeholder.jpg");
   };
 
+  const validateAndPlayGenre = async (selectedGenre) => {
+    const allowedGenres = [
+      "Childhood",
+      "Comedy",
+      "Crime Heist",
+      "Cyberpunk",
+      "Detective",
+      "Dystopian",
+      "Fairy Tale",
+      "Fantasy",
+      "Historical Adventure",
+      "Horror",
+      "Medieval",
+      "Mystery",
+      "Mythology",
+      "Nostalgia",
+      "Post Apocalyptic",
+      "Romantic",
+      "Sad",
+      "Science Fiction",
+      "Slice Of Life",
+      "Steampunk",
+      "Superhero",
+      "Survival",
+      "Thriller",
+      "Tragic",
+      "Western",
+    ];
+
+    try {
+      const response = await getGroqChatCompletion([
+        {
+          role: "system",
+          content: `You are an AI that selects genres for an interactive story game. You must choose the most appropriate genre from the following list:\n${allowedGenres.join(
+            ", "
+          )}. Always pick a genre from the list, even if the user's input is not an exact match.`,
+        },
+        {
+          role: "user",
+          content: `Choose the closest genre to this input: ${selectedGenre}, only output the word of the genre and nothing else`,
+        },
+      ]);
+
+      const genreResponse = response.trim();
+      console.log("GENRE MUSIC", genreResponse);
+      console.log(allowedGenres);
+
+      if (allowedGenres.includes(genreResponse)) {
+        setMusicGenre(genreResponse);
+        console.log("GENRE MUSIC", genreResponse);
+      }
+    } catch (err) {
+      console.error("Error validating and playing genre:", err);
+      setError("Failed to validate genre. Please try again.");
+    }
+  };
+
+  const playMusic = (genre) => {
+    const audio = new Audio(`/assets/InGame Music/${genre}.mp3`);
+    const audioContext = new (window.AudioContext ||
+      window.webkitAudioContext)();
+    const gainNode = audioContext.createGain();
+    const source = audioContext.createMediaElementSource(audio);
+
+    // Connect the audio source to the gain node and then to the audio context
+    source.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+
+    // Set initial volume to 0
+    gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+
+    // Fade in the volume over 2 seconds
+    gainNode.gain.linearRampToValueAtTime(1, audioContext.currentTime + 2);
+
+    // Play the audio
+    audio.play().catch((err) => {
+      console.error("Error playing audio:", err);
+    });
+  };
+
   return (
     <div
       className="gameplay-container h-screen flex flex-col items-center justify-center"
@@ -356,9 +448,9 @@ const GamePage = () => {
               <button
                 onClick={handlePlayerAction}
                 disabled={isLoading}
-                className="py-2 px-5 bg-purple-600 text-white rounded-full hover:bg-purple-700 focus:outline-none w-fit"
+                className="p-6 bg-purple-600 text-white rounded-full hover:bg-purple-700 focus:outline-none w-5 h-5 flex justify-center items-center"
               >
-                Submit
+                <FontAwesomeIcon icon={faArrowRight} />
               </button>
             </div>
           ) : (

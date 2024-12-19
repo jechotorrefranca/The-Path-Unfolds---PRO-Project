@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import "./Settings.css"; // Scoped styles for the visual novel style
+import "./Settings.css";
 
 const SettingsModal = ({
   isOpen,

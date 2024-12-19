@@ -5,7 +5,6 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import backgroundMusic from "../assets/TitleScreen Music/TitleScreenBGM.mp3";
 import SettingsModal from "../Components/SettingsModal/Settings";
-import Particles from "react-tsparticles";
 import "./TitleScreen.css";
 
 const TitleScreen = () => {
