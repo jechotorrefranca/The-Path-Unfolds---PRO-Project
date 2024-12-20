@@ -3,11 +3,12 @@ import Groq from "groq-sdk";
 import GenreSelection from "./GenreSelection";
 import debounce from "lodash/debounce";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowRight, faGear } from "@fortawesome/free-solid-svg-icons";
+import { faArrowRight, faGear, faWindowRestore } from "@fortawesome/free-solid-svg-icons";
 import { usePollinationsImage } from "@pollinations/react";
 import { Typewriter } from "react-simple-typewriter";
 import SettingsModal from "../Components/SettingsModal/Settings";
 import "./Game.css";
+import TalkToSpeech from "../Services/TalkToSpeech";
 
 const groq = new Groq({
   apiKey: process.env.REACT_APP_GROQ_API_KEY,
@@ -43,6 +44,9 @@ const GamePage = () => {
   const [isMuted, setIsMuted] = useState(false);
 
   const audioRef = useRef(null);
+
+  const [textToSpeech, setTextToSpeech] = useState();
+  const voice = { id: 'L1aJrPa7pLJEyYlh3Ilq', name: 'Olliver Haddington' }
 
   useEffect(() => {
     const savedMusicVolume = parseFloat(localStorage.getItem("musicVolume"));
@@ -110,8 +114,8 @@ const GamePage = () => {
   };
 
   const backgroundImageUrl = usePollinationsImage(imageGenText, {
-    width: 1280,
-    height: 720,
+    width: window.innerWidth,
+    height: window.innerHeight,
     model: "flux",
   });
 
@@ -292,6 +296,7 @@ const GamePage = () => {
 
       setStoryContext([initialStory]);
       setAIResponse(initialStory);
+      setTextToSpeech(initialStory);
       summarizeStoryForImage(initialStory);
       console.log(initialStory);
     } catch (err) {
@@ -352,6 +357,7 @@ const GamePage = () => {
           ]);
 
           setAIResponse(content);
+          setTextToSpeech(content);
           setCurrentPrompt((prev) => prev + 1);
           summarizeStoryForImage(content);
         }
@@ -383,6 +389,7 @@ const GamePage = () => {
 
       setStoryContext((prev) => [...prev, `Ending: ${ending}`]);
       setAIResponse(ending);
+      setTextToSpeech(ending);
       setIsStoryComplete(true);
       summarizeStoryForImage(ending);
       console.log(storyContext);
@@ -486,19 +493,24 @@ const GamePage = () => {
 
   return (
     <div
-      className="gameplay-container h-screen flex flex-col items-center justify-center"
+      className="gameplay-container min-h-screen h-full flex flex-col relative bg-no-repeat bg-cover bg-center"
       style={{
-        backgroundImage: `url(${currentImage})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
+        backgroundImage: `url(${currentImage})`
       }}
     >
+      <div 
+        className="text-purple-400 absolute top-0 left-0 m-4 cursor-pointer text-2xl md:text-4xl z-10"
+        onClick={handleShowSettings}
+      >
+        <FontAwesomeIcon icon={faGear} />
+      </div>
+
       {!genre ? (
         <GenreSelection onSelectGenre={setGenre} />
       ) : (
-        <div className="bottom-panel">
-          <div className="story-box mb-4 px-10">
-            <p className="text-2xl leading-relaxed whitespace-pre-wrap text-white text-center">
+        <div className="bottom-panel w-full flex-1 flex flex-col justify-end pb-4 px-4 md:px-8">
+          <div className="story-box max-h-[60vh] overflow-y-auto mb-4 px-4 md:px-8 scrollbar-thin scrollbar-thumb-purple-600 scrollbar-track-transparent">
+            <p className="text-lg md:text-2xl leading-relaxed whitespace-pre-wrap text-white text-center">
               <Typewriter
                 key={aiResponse || "loading"}
                 words={aiResponse ? [aiResponse] : ["Loading story..."]}
@@ -508,19 +520,20 @@ const GamePage = () => {
               />
             </p>
           </div>
+
           {!isStoryComplete && currentPrompt <= 5 && inputShow ? (
-            <div className="player-input flex justify-center items-center bg-zinc-900 p-3 rounded-full gap-3">
+            <div className="player-input flex justify-center items-center bg-zinc-900/90 p-2 md:p-3 rounded-full gap-2 md:gap-3 mx-4">
               <input
                 type="text"
                 value={playerAction}
                 onChange={(e) => setPlayerAction(e.target.value)}
                 placeholder="What will you do next?"
-                className="w-full p-2 rounded-full bg-transparent focus:outline-none focus:ring-2 focus:ring-purple-500 text-2xl px-5 text-white"
+                className="w-full p-2 rounded-full bg-transparent focus:outline-none focus:ring-2 focus:ring-purple-500 text-lg md:text-2xl px-3 md:px-5 text-white"
               />
               <button
                 onClick={handlePlayerAction}
                 disabled={isLoading}
-                className="p-6 bg-purple-600 text-white rounded-full hover:bg-purple-700 focus:outline-none w-5 h-5 flex justify-center items-center"
+                className="p-4 md:p-6 bg-purple-600 text-white rounded-full hover:bg-purple-700 focus:outline-none w-4 h-4 md:w-5 md:h-5 flex justify-center items-center"
               >
                 <FontAwesomeIcon icon={faArrowRight} />
               </button>
@@ -528,7 +541,7 @@ const GamePage = () => {
           ) : (
             <>
               {isStoryComplete && inputShow ? (
-                <div className="flex justify-center mt-5">
+                <div className="flex justify-center mt-4">
                   <button
                     onClick={handlePlayAgain}
                     className="py-2 px-5 bg-purple-600 text-white rounded-full hover:bg-purple-700 focus:outline-none"
@@ -537,37 +550,33 @@ const GamePage = () => {
                   </button>
                 </div>
               ) : (
-                <div className="flex justify-center text-gray-400 p-10">
+                <div className="flex justify-center text-gray-400 p-4 md:p-8">
                   <p>Loading Image...</p>
                 </div>
               )}
             </>
           )}
+
           {error && <p className="text-red-500 text-center mt-4">{error}</p>}
+          <TalkToSpeech text={textToSpeech} voice={voice} />
         </div>
       )}
+
       {showModal && (
-        <div className="modal-overlay fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
-          <div className="modal-content bg-white p-6 rounded-lg shadow-xl max-w-sm w-full">
-            <h2 className="text-xl font-bold text-red-600">Invalid Action</h2>
+        <div className="modal-overlay fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="modal-content bg-white p-4 md:p-6 rounded-lg shadow-xl max-w-sm w-full mx-4">
+            <h2 className="text-lg md:text-xl font-bold text-red-600">Invalid Action</h2>
             <p className="text-gray-800 mt-2">{modalMessage}</p>
             <p>{invalidContent}</p>
             <button
               onClick={closeModal}
-              className="mt-4 py-2 px-4 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:outline-none"
+              className="mt-4 py-2 px-4 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:outline-none w-full"
             >
               Close
             </button>
           </div>
         </div>
       )}
-
-      <div
-        className="text-purple-400 absolute top-0 left-0 m-5 cursor-pointer text-4xl"
-        onClick={handleShowSettings}
-      >
-        <FontAwesomeIcon icon={faGear} />
-      </div>
 
       <SettingsModal
         isOpen={isShowSettings}
