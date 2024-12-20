@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import backgroundMusic from "../assets/TitleScreen Music/TitleScreenBGM.mp3";
 import SettingsModal from "../Components/SettingsModal/Settings";
 import "./TitleScreen.css";
+import TalkTuahSpeach from "../Service/TalkTuahSpeach";
 
 const TitleScreen = () => {
   const navigate = useNavigate();
@@ -196,6 +197,11 @@ const TitleScreen = () => {
         onClose={() => setIsSettingsOpen(false)}
         onSave={saveSettings}
         musicVolume={musicVolume}
+        narratorVolume={narratorVolume}
+        isMuted={isMuted}
+      />
+      
+      <TalkTuahSpeach 
         narratorVolume={narratorVolume}
         isMuted={isMuted}
       />

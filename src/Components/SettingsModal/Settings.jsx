@@ -101,7 +101,7 @@ const SettingsModal = ({
                 />
               </label>
             </div>
-
+                  
             <div className="setting-section button-container">
               <button onClick={handleReset} className="reset-button">
                 Reset to Default
