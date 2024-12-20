@@ -3,7 +3,6 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import TitleScreen from "./Pages/TitleScreen";
 // import About from "./Pages/About"
 import GamePage from "./Game/GamePage"
-import TalkTuahSpeach from "./Service/TalkTuahSpeach";
 
 const router = createBrowserRouter([
   {

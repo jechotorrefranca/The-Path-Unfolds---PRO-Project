@@ -6,7 +6,6 @@ import { motion } from "framer-motion";
 import backgroundMusic from "../assets/TitleScreen Music/TitleScreenBGM.mp3";
 import SettingsModal from "../Components/SettingsModal/Settings";
 import "./TitleScreen.css";
-import TalkTuahSpeach from "../Service/TalkTuahSpeach";
 
 const TitleScreen = () => {
   const navigate = useNavigate();
@@ -124,90 +123,94 @@ const TitleScreen = () => {
 
   return (
     <motion.div
-      className="h-screen w-screen flex flex-col relative"
-      style={{
-        backgroundImage: bgImage ? `url(${bgImage})` : "none",
-        backgroundColor: !bgImage ? "black" : "transparent",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-      }}
-      initial={{ opacity: 1 }}
-      animate={{ opacity: isTransitioning ? 0 : 1 }}
-      transition={{ duration: 0.5 }}
-    >
-      <motion.div
-        className="absolute inset-0 bg-black opacity-70 z-0"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: isStarted ? 0.7 : 0 }}
-        transition={{ duration: 1 }}
-      />
+  className="min-h-screen w-screen flex flex-col relative"
+  style={{
+    backgroundImage: bgImage ? `url(${bgImage})` : "none",
+    backgroundColor: !bgImage ? "black" : "transparent",
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+  }}
+  initial={{ opacity: 1 }}
+  animate={{ opacity: isTransitioning ? 0 : 1 }}
+  transition={{ duration: 0.5 }}
+>
+  {/* Background overlay */}
+  <motion.div
+    className="absolute inset-0 bg-black opacity-70 z-0"
+    initial={{ opacity: 0 }}
+    animate={{ opacity: isStarted ? 0.7 : 0 }}
+    transition={{ duration: 1 }}
+  />
 
-      <motion.div
-        className="z-0"
-        variants={titleVariants}
-        initial="initial"
-        animate={isStarted ? "animate" : "initial"}
+  {/* Animated title */}
+  <motion.div
+    className="z-10"
+    variants={titleVariants}
+    initial="initial"
+    animate={isStarted ? "animate" : "initial"}
+  >
+    <h1 className="font-breatheFire text-3xl sm:text-5xl md:text-7xl lg:text-9xl text-transparent ml-4 sm:ml-8 lg:ml-20 mt-20 sm:mt-8 lg:mt-12 leading-tight tracking-widest gradient-text">
+      The <br />
+      Path Unfolds
+    </h1>
+  </motion.div>
+
+  {/* Buttons section */}
+  <motion.div
+    className="flex flex-col space-y-4 sm:space-y-6 mt-auto mb-6 sm:mb-10 items-end font-morris mr-4 sm:mr-8"
+    variants={buttonVariants}
+    initial="initial"
+    animate={isStarted ? "animate" : "initial"}
+  >
+    {/* Start Game Button */}
+    <motion.div initial="initial" animate="animate">
+      <button
+        className="relative py-4 sm:py-6 lg:py-8 text-white rounded-full pr-4 sm:pr-8 pl-32 sm:pl-48 group overflow-hidden flex"
+        onClick={handleStartGame}
       >
-        <h1 className="font-breatheFire text-[2.5rem] sm:text-[5rem] lg:text-[10rem] text-transparent sm:ml-[2rem] mt-[15rem] ml-[1rem] sm:mt-[2rem] lg:ml-[5rem] lg:mt-[3rem] leading-[1] tracking-widest gradient-text">
-          The <br />
-          Path Unfolds
-        </h1>
-      </motion.div>
-
-      <motion.div
-        className="flex flex-col space-y-1 mt-auto mb-8 items-end font-morris text-[3rem] mr-[2rem]"
-        variants={buttonVariants}
-        initial="initial"
-        animate={isStarted ? "animate" : "initial"}
-      >
-        <motion.div className="" initial="initial" animate="animate">
-          <button
-            className="relative py-10 text-white rounded-full pr-[2rem] pl-[15rem] text-xl group overflow-hidden flex"
-            onClick={handleStartGame}
-          >
-            <span className="relative text-[5rem] z-10">Start Game</span>
-            <span className="absolute inset-0 bg-gradient-to-r from-transparent to-[#8a6fff] opacity-0 group-hover:opacity-100 transition-opacity duration-500"></span>
-          </button>
-        </motion.div>
-
-        <button
-          className="relative py-10 text-white rounded-full pr-[2rem] pl-[15rem] text-xl group overflow-hidden flex"
-          onClick={() => setIsSettingsOpen(true)}
-        >
-          <span className="relative text-[5rem] z-10">Settings</span>
-          <span className="absolute inset-0 bg-gradient-to-r from-transparent to-[#8a6fff] opacity-0 group-hover:opacity-100 transition-opacity duration-500"></span>
-        </button>
-
-        <Link to="/about">
-          <button className="relative py-10 text-white rounded-full pr-[2rem] pl-[15rem] text-xl group overflow-hidden flex">
-            <span className="relative text-[5rem] z-10">About</span>
-            <span className="absolute inset-0 bg-gradient-to-r from-transparent to-[#8a6fff] opacity-0 group-hover:opacity-100 transition-opacity duration-500"></span>
-          </button>
-        </Link>
-      </motion.div>
-
-      <Modal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onConfirm={startMusic}
-      />
-
-      <SettingsModal
-        isOpen={isSettingsOpen}
-        onClose={() => setIsSettingsOpen(false)}
-        onSave={saveSettings}
-        musicVolume={musicVolume}
-        narratorVolume={narratorVolume}
-        isMuted={isMuted}
-      />
-      
-      <TalkTuahSpeach 
-        narratorVolume={narratorVolume}
-        isMuted={isMuted}
-      />
-
-      <audio ref={audioRef} src={backgroundMusic} />
+        <span className="relative text-2xl sm:text-3xl lg:text-5xl z-10">Start Game</span>
+        <span className="absolute inset-0 bg-gradient-to-r from-transparent to-[#8a6fff] opacity-0 group-hover:opacity-100 transition-opacity duration-500"></span>
+      </button>
     </motion.div>
+
+    {/* Settings Button */}
+    <button
+      className="relative py-4 sm:py-6 lg:py-8 text-white rounded-full pr-4 sm:pr-8 pl-32 sm:pl-48 group overflow-hidden flex"
+      onClick={() => setIsSettingsOpen(true)}
+    >
+      <span className="relative text-2xl sm:text-3xl lg:text-5xl z-10">Settings</span>
+      <span className="absolute inset-0 bg-gradient-to-r from-transparent to-[#8a6fff] opacity-0 group-hover:opacity-100 transition-opacity duration-500"></span>
+    </button>
+
+    {/* About Button */}
+    <Link to="/about">
+      <button className="relative py-4 sm:py-6 lg:py-8 text-white rounded-full pr-4 sm:pr-8 pl-32 sm:pl-48 group overflow-hidden flex">
+        <span className="relative text-2xl sm:text-3xl lg:text-5xl z-10">About</span>
+        <span className="absolute inset-0 bg-gradient-to-r from-transparent to-[#8a6fff] opacity-0 group-hover:opacity-100 transition-opacity duration-500"></span>
+      </button>
+    </Link>
+  </motion.div>
+
+  {/* Modal components */}
+  <Modal
+    isOpen={isModalOpen}
+    onClose={() => setIsModalOpen(false)}
+    onConfirm={startMusic}
+  />
+
+  <SettingsModal
+    isOpen={isSettingsOpen}
+    onClose={() => setIsSettingsOpen(false)}
+    onSave={saveSettings}
+    musicVolume={musicVolume}
+    narratorVolume={narratorVolume}
+    isMuted={isMuted}
+  />
+
+  {/* Background Music */}
+  <audio ref={audioRef} src={backgroundMusic} />
+</motion.div>
+
   );
 };
 

@@ -1,8 +1,8 @@
 import axios from 'axios';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react'
 import { useLocation } from 'react-router-dom';
 
-const TalkTuahSpeech = ({ text, voiceId }) => {
+const TalkToSpeech = ({ text, voice }) => {
    const [audioUrl, setAudioUrl] = useState(null);
    const [isLoading, setIsLoading] = useState(false);
    const [error, setError] = useState(null);
@@ -10,15 +10,18 @@ const TalkTuahSpeech = ({ text, voiceId }) => {
    const previousTextRef = useRef(text); // To track text changes
    const location = useLocation();
 
+   console.log(voice.id)
+
    const generateSpeech = async () => {
       setIsLoading(true);
       setError(null);
 
       try {
          const response = await axios.post(
-            `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
+            `https://api.elevenlabs.io/v1/text-to-speech/${voice.id}`,
             {
                text: text,
+               model_id: "eleven_turbo_v2_5",
                voice_settings: {
                   stability: 0.7,
                   similarity_boost: 0.97,
@@ -28,7 +31,7 @@ const TalkTuahSpeech = ({ text, voiceId }) => {
             },
             {
                headers: {
-                  'xi-api-key': 'sk_3a8fc8b4ee05f2512effe274aa526dcaa9c1fb28b73cd45e',
+                  'xi-api-key': 'sk_a9f69387ed3c15e26b64ac4cbf2e9ea15f18f44cc4cbe52f',
                   'Content-Type': 'application/json',
                   'Accept': 'audio/mpeg'
                },
@@ -61,14 +64,17 @@ const TalkTuahSpeech = ({ text, voiceId }) => {
       }
    }, [text]);
 
+   const savedNarratorVolume = parseFloat(localStorage.getItem('narratorVolume')) || 1.0;
+
    // Effect to play audio when URL is available
    useEffect(() => {
       if (audioUrl && audioRef.current) {
-         const savedNarratorVolume = parseFloat(localStorage.getItem('narratorVolume')) || 1.0;
          const savedIsMuted = localStorage.getItem('isMuted') === 'true';
 
          // Set volume and mute based on saved values
          const validVolume = !isNaN(savedNarratorVolume) ? Math.min(Math.max(savedNarratorVolume, 0), 1) : 1;
+
+         console.log(validVolume);
 
          if (audioRef.current) {
             audioRef.current.volume = validVolume;  // This can be 0.6, 0.5, etc.
@@ -80,9 +86,8 @@ const TalkTuahSpeech = ({ text, voiceId }) => {
             console.error('Failed to play audio:', err);
          });
       }
-   }, [audioUrl]);
-
-   // Cleanup effect
+   }, [audioUrl, savedNarratorVolume]);
+   
    useEffect(() => {
       return () => {
          if (audioUrl) {
@@ -104,6 +109,6 @@ const TalkTuahSpeech = ({ text, voiceId }) => {
          )}
       </>
    );
-};
+}
 
-export default TalkTuahSpeech;
+export default TalkToSpeech
