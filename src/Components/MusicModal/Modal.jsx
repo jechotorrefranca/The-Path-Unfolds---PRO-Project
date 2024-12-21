@@ -1,9 +1,8 @@
 import React from "react";
-import { motion, AnimatePresence } from "framer-motion"; // Import AnimatePresence
+import { motion, AnimatePresence } from "framer-motion";
 import "./Modal.css";
 
 const Modal = ({ isOpen, onClose, onConfirm }) => {
-  // Animation variants for modal
   const modalVariants = {
     initial: {
       scale: 0.5,
@@ -53,7 +52,7 @@ const Modal = ({ isOpen, onClose, onConfirm }) => {
                 The Path Unfolds
               </p>
             </h2>
-            
+
             <p className="mb-4 sm:mb-6 text-white text-center text-sm sm:text-base">
               Click "Start" to begin your journey!
             </p>

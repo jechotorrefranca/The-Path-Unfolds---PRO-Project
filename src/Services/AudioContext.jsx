@@ -1,5 +1,10 @@
-// AudioContext.js
-import React, { createContext, useContext, useRef, useState, useEffect } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useRef,
+  useState,
+  useEffect,
+} from "react";
 import backgroundMusic from "../assets/TitleScreen Music/TitleScreenBGM.mp3";
 
 const AudioContext = createContext();
@@ -17,7 +22,8 @@ export const AudioProvider = ({ children }) => {
     const savedIsMuted = localStorage.getItem("isMuted");
 
     if (savedMusicVolume !== null) setMusicVolume(parseFloat(savedMusicVolume));
-    if (savedNarratorVolume !== null) setNarratorVolume(parseFloat(savedNarratorVolume));
+    if (savedNarratorVolume !== null)
+      setNarratorVolume(parseFloat(savedNarratorVolume));
     if (savedIsMuted !== null) setIsMuted(savedIsMuted === "true");
   }, []);
 
@@ -83,7 +89,7 @@ export const AudioProvider = ({ children }) => {
         startMusic,
         stopMusic,
         fadeOutMusic,
-        isPlaying
+        isPlaying,
       }}
     >
       <audio ref={audioRef} src={backgroundMusic} />

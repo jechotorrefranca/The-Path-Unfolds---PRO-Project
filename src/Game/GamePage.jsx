@@ -43,7 +43,6 @@ const GamePage = () => {
   const [isShowSettings, setIsShowSettings] = useState(false);
   const [shouldPlayTTS, setShouldPlayTTS] = useState(false);
 
-  // Audio settings
   const [musicVolume, setMusicVolume] = useState(0.5);
   const [narratorVolume, setNarratorVolume] = useState(0.5);
   const [isMuted, setIsMuted] = useState(false);
@@ -173,13 +172,6 @@ const GamePage = () => {
       clearTimeout(loadTimeout);
     };
   }, [backgroundImageUrl]);
-
-  // useEffect(() => {
-  //   if (newImage) {
-  //     setCurrentImage(newImage);
-  //     console.log("wahoooo");
-  //   }
-  // }, [newImage]);
 
   useEffect(() => {
     if (newImage) {
