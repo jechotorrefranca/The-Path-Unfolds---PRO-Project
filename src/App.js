@@ -3,18 +3,28 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import TitleScreen from "./Pages/TitleScreen";
 // import About from "./Pages/About"
 import GamePage from "./Game/GamePage"
+import About from "./Pages/About";
+import { AudioProvider } from "./Services/AudioContext";
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <TitleScreen />,
+    element: (
+      <AudioProvider>
+        <TitleScreen />
+      </AudioProvider>
+    ),
   },
-  // {
-  //   path: "/about",
-  //   element: <About />,
-  // },
   {
-    path: "/game",
+    path: "/about",
+    element: (
+      <AudioProvider>
+        <About />
+      </AudioProvider>
+    ),
+  },
+{
+  path: "/game",
     element: <GamePage />,
   },
 ]);
