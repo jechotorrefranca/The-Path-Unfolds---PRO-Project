@@ -3,7 +3,11 @@ import Groq from "groq-sdk";
 import GenreSelection from "./GenreSelection";
 import debounce from "lodash/debounce";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowRight, faGear, faWindowRestore } from "@fortawesome/free-solid-svg-icons";
+import {
+  faArrowRight,
+  faGear,
+  faWindowRestore,
+} from "@fortawesome/free-solid-svg-icons";
 import { usePollinationsImage } from "@pollinations/react";
 import { Typewriter } from "react-simple-typewriter";
 import SettingsModal from "../Components/SettingsModal/Settings";
@@ -47,7 +51,7 @@ const GamePage = () => {
   const audioRef = useRef(null);
 
   const [textToSpeech, setTextToSpeech] = useState();
-  const voice = { id: 'L1aJrPa7pLJEyYlh3Ilq', name: 'Olliver Haddington' }
+  const voice = { id: "L1aJrPa7pLJEyYlh3Ilq", name: "Olliver Haddington" };
 
   useEffect(() => {
     const savedMusicVolume = parseFloat(localStorage.getItem("musicVolume"));
@@ -497,12 +501,11 @@ const GamePage = () => {
     }
   };
 
-
   return (
     <div
       className="gameplay-container min-h-screen h-full flex flex-col relative bg-no-repeat bg-cover bg-center"
       style={{
-        backgroundImage: `url(${currentImage})`
+        backgroundImage: `url(${currentImage})`,
       }}
     >
       <div
@@ -518,13 +521,15 @@ const GamePage = () => {
         <div className="bottom-panel w-full flex-1 flex flex-col justify-end pb-4 px-4 md:px-8">
           <div className="story-box max-h-[60vh] overflow-y-auto mb-4 px-4 md:px-8 scrollbar-thin scrollbar-thumb-purple-600 scrollbar-track-transparent">
             <p className="text-lg md:text-2xl leading-relaxed whitespace-pre-wrap text-white text-center">
-              <Typewriter
-                key={aiResponse || "loading"}
-                words={aiResponse ? [aiResponse] : ["Loading story..."]}
-                loop={1}
-                typeSpeed={50}
-                deleteSpeed={50}
-              />
+              {inputShow && (
+                <Typewriter
+                  key={aiResponse || "loading"}
+                  words={aiResponse ? [aiResponse] : ["Loading story..."]}
+                  loop={1}
+                  typeSpeed={50}
+                  deleteSpeed={50}
+                />
+              )}
             </p>
           </div>
 
@@ -558,21 +563,27 @@ const GamePage = () => {
                 </div>
               ) : (
                 <div className="flex justify-center text-gray-400 p-4 md:p-8">
-                  <p>Loading Image...</p>
+                  <p>Loading...</p>
                 </div>
               )}
             </>
           )}
 
           {error && <p className="text-red-500 text-center mt-4">{error}</p>}
-          <TalkToSpeech text={textToSpeech} voice={voice} shouldPlayTTS={shouldPlayTTS} />
+          <TalkToSpeech
+            text={textToSpeech}
+            voice={voice}
+            shouldPlayTTS={shouldPlayTTS}
+          />
         </div>
       )}
 
       {showModal && (
         <div className="modal-overlay fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="modal-content bg-white p-4 md:p-6 rounded-lg shadow-xl max-w-sm w-full mx-4">
-            <h2 className="text-lg md:text-xl font-bold text-red-600">Invalid Action</h2>
+            <h2 className="text-lg md:text-xl font-bold text-red-600">
+              Invalid Action
+            </h2>
             <p className="text-gray-800 mt-2">{modalMessage}</p>
             <p>{invalidContent}</p>
             <button
