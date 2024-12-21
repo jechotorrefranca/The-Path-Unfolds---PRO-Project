@@ -2,19 +2,19 @@ import axios from 'axios';
 import React, { useEffect, useRef, useState } from 'react'
 import { useLocation } from 'react-router-dom';
 
-const TalkToSpeech = ({ text, voice }) => {
+const TalkToSpeech = ({ text, voice, shouldPlayTTS }) => {
    const [audioUrl, setAudioUrl] = useState(null);
    const [isLoading, setIsLoading] = useState(false);
    const [error, setError] = useState(null);
+   const [isAudioReady, setIsAudioReady] = useState(false);
    const audioRef = useRef(null);
-   const previousTextRef = useRef(text); // To track text changes
+   const previousTextRef = useRef(text);
    const location = useLocation();
-
-   console.log(voice.id)
 
    const generateSpeech = async () => {
       setIsLoading(true);
       setError(null);
+      setIsAudioReady(false); // Reset audio ready state when generating new speech
 
       try {
          const response = await axios.post(
@@ -47,6 +47,7 @@ const TalkToSpeech = ({ text, voice }) => {
          const audioBlob = new Blob([response.data], { type: 'audio/mpeg' });
          const newAudioUrl = URL.createObjectURL(audioBlob);
          setAudioUrl(newAudioUrl);
+         setIsAudioReady(true); // Mark audio as ready after successful generation
       } catch (error) {
          console.log(error);
          setError('Failed to generate speech');
@@ -66,32 +67,40 @@ const TalkToSpeech = ({ text, voice }) => {
 
    const savedNarratorVolume = parseFloat(localStorage.getItem('narratorVolume')) || 1.0;
 
-   // Effect to play audio when URL is available
+   // Effect to handle audio playback based on image loading and audio readiness
    useEffect(() => {
-      if (audioUrl && audioRef.current) {
+      if (audioUrl && audioRef.current && isAudioReady && shouldPlayTTS) {
          const savedIsMuted = localStorage.getItem('isMuted') === 'true';
-
-         // Set volume and mute based on saved values
          const validVolume = !isNaN(savedNarratorVolume) ? Math.min(Math.max(savedNarratorVolume, 0), 1) : 1;
 
-         console.log(validVolume);
+         console.log('Audio ready and image loaded. Playing audio with volume:', validVolume);
 
          if (audioRef.current) {
-            audioRef.current.volume = validVolume;  // This can be 0.6, 0.5, etc.
+            audioRef.current.volume = validVolume;
+            audioRef.current.muted = savedIsMuted;
+
+            // Reset audio to start
+            audioRef.current.currentTime = 0;
+
+            audioRef.current.play().catch((err) => {
+               console.error('Failed to play audio:', err);
+            });
          }
-
-         audioRef.current.muted = savedIsMuted;
-
-         audioRef.current.play().catch((err) => {
-            console.error('Failed to play audio:', err);
-         });
+      } else if (audioRef.current && !shouldPlayTTS) {
+         // Pause audio if image isn't loaded
+         console.log('Image not loaded, pausing audio');
+         audioRef.current.pause();
       }
-   }, [audioUrl, savedNarratorVolume]);
+   }, [audioUrl, savedNarratorVolume, shouldPlayTTS, isAudioReady]);
    
+   // Cleanup effect
    useEffect(() => {
       return () => {
          if (audioUrl) {
             URL.revokeObjectURL(audioUrl);
+         }
+         if (audioRef.current) {
+            audioRef.current.pause();
          }
       };
    }, []);
@@ -111,4 +120,4 @@ const TalkToSpeech = ({ text, voice }) => {
    );
 }
 
-export default TalkToSpeech
+export default TalkToSpeech;

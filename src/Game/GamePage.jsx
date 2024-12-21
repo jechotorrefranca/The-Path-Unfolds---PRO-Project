@@ -37,6 +37,7 @@ const GamePage = () => {
   const [inputShow, setInputShow] = useState(false);
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
   const [isShowSettings, setIsShowSettings] = useState(false);
+  const [shouldPlayTTS, setShouldPlayTTS] = useState(false);
 
   // Audio settings
   const [musicVolume, setMusicVolume] = useState(0.5);
@@ -135,6 +136,7 @@ const GamePage = () => {
           setIsImageLoading(false);
           console.log("Image loaded successfully.");
           setInputShow(true);
+          setShouldPlayTTS(true);
 
           if (!isMusicPlaying && musicGenre) {
             playMusic(musicGenre);
@@ -146,6 +148,7 @@ const GamePage = () => {
           clearTimeout(loadTimeout);
           console.error("Error loading background image.");
           setIsImageLoading(true);
+          setShouldPlayTTS(false);
           retryTimeout = setTimeout(() => {
             console.log("Retrying image load...");
             loadImage();
@@ -312,6 +315,7 @@ const GamePage = () => {
 
     setIsLoading(true);
     setError("");
+    setShouldPlayTTS(false);
 
     try {
       const response = await getGroqChatCompletion([
@@ -390,6 +394,7 @@ const GamePage = () => {
       setStoryContext((prev) => [...prev, `Ending: ${ending}`]);
       setAIResponse(ending);
       setTextToSpeech(ending);
+      setShouldPlayTTS(false);
       setIsStoryComplete(true);
       summarizeStoryForImage(ending);
       console.log(storyContext);
@@ -424,6 +429,7 @@ const GamePage = () => {
     setShowModal(false);
     setInvalidContent("");
     setCurrentImage("/Background/placeholder.jpg");
+    setShouldPlayTTS(false);
 
     if (audioRef.current) {
       audioRef.current.pause();
@@ -491,6 +497,7 @@ const GamePage = () => {
     }
   };
 
+
   return (
     <div
       className="gameplay-container min-h-screen h-full flex flex-col relative bg-no-repeat bg-cover bg-center"
@@ -498,7 +505,7 @@ const GamePage = () => {
         backgroundImage: `url(${currentImage})`
       }}
     >
-      <div 
+      <div
         className="text-purple-400 absolute top-0 left-0 m-4 cursor-pointer text-2xl md:text-4xl z-10"
         onClick={handleShowSettings}
       >
@@ -558,7 +565,7 @@ const GamePage = () => {
           )}
 
           {error && <p className="text-red-500 text-center mt-4">{error}</p>}
-          <TalkToSpeech text={textToSpeech} voice={voice} />
+          <TalkToSpeech text={textToSpeech} voice={voice} shouldPlayTTS={shouldPlayTTS} />
         </div>
       )}
 
